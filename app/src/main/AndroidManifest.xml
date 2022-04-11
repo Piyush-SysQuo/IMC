@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="sa.med.imc.myimc">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> -->
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--SYSQUO-->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="com.twilio.chat.demo.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.twilio.chat.demo.permission.C2D_MESSAGE" />
+    <!--SYSQUO-->
+<!--    android:networkSecurityConfig="@xml/network_security_config" -->
+
+
+    <application
+        android:name=".Network.ImcApplication"
+        android:allowBackup="false"
+        android:debuggable="false"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/logo_s"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning,HardcodedDebugMode"
+        tools:replace="android:allowBackup,android:name,android:theme">
+        <activity android:name=".Wellness.Wellness_WebView" />
+        <activity android:name=".ViewReportActivity"></activity>
+        <activity
+            android:name=".Questionaires.view.CompletedFormsListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Questionaires.view.PromissResultsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Questionaires.view.ResultAssessmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Questionaires.view.AssessmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings.FingerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MedicineDetail.MedicineReminderActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SplashActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FilePicker.FilePickerActivity"
+            android:screenOrientation="portrait" /> <!-- FileChooser Activity -->
+        <activity
+            android:name=".HealthTips.view.YoutubePlayerActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".HealthTips.view.HealthTipsActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".RetailModule.view.RetailFacilitiesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Departments.view.DepartmentDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Departments.view.DepartmentsActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".WebViewStuff.WebViewActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Records.view.SingleFragmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings.ContactOptionsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings.AboutAppActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Records.view.SearchReportsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Appointmnet.view.AppointmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RetailModule.view.CheckOutOrderActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".OrderProfile.OrdersDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".OrderProfile.ProfileOrdersActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AddressOrder.AddressOrderActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".GuestHome.UserInfoOrderActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".RetailModule.view.CartActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RetailModule.view.ProductDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RetailModule.view.ProductsListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RetailModule.view.AllCategoriesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".FindDoctor.FindDoctorActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Notifications.view.NotificationsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Bill.SelectCardActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".GuestHome.HealthBytes.HealthBytesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RequestAppointment.view.RequestAppointmentActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Bill.PaymentSuccessActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Bill.BillUpdatedActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VideoCallActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".AddGuardian.view.ConsentForm2Activity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AddGuardian.view.ConsentForm1Activity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Chat.ChatActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Managebookings.VisitDetail.VisitCompletedAppointmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RateDoctor.RateDoctorActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ReminderNotificationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MedicineDetail.MedicineDetailActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".AddGuardian.view.AddGuardianActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".WayFinderMap.WayFinderMapActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".VirtualTour.VirtualTourActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings.ContactUsActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Questionaires.view.QuestionareActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Calculators.CalculatorsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Managebookings.view.ManageBookingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UrlOpen.ConsentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".UrlOpen.UrlOpenActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Settings.SettingActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".GuestHome.GuestHomeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SignUp.view.SignUpStep2Activity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".SignUp.RegisterNumberActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Physicians.view.PhysicianDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Physicians.view.PhysiciansActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SignUp.view.SignUpStep1Activity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Telr.TelrActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Telr.UpcomingTelr"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Login.Validate.VerificationActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Login.LoginActivity"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".WelcomeActivity"
+            android:configChanges="locale|orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
+            <intent-filter
+                android:autoVerify="true"
+                android:label="@string/app_name">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="192.168.1.49"
+                    android:pathPrefix="/imctest"
+                    android:port="8080"
+                    android:scheme="http" />
+            </intent-filter>
+
+            <tools:validation testUrl="http://192.168.1.49:8080/imctest" />
+        </activity>
+
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_deactivated"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_messaging_auto_init_enabled"
+            android:value="true" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="true" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/small_imc_icon" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_path"
+                tools:replace="android:resource" />
+        </provider>
+
+        <receiver
+            android:name="com.appsflyer.SingleInstallBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".Login.Validate.IncomingSms"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED" />
+            </intent-filter>
+        </receiver> <!-- Declare  Alarm Broadcast receiver here -->
+        <receiver android:name=".MedicineDetail.AlarmReceiver" /> <!-- Declare  Alarm Notification Service here -->
+        <service
+            android:name=".Notification.MyFirebaseMessagningService"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".MedicineDetail.AlarmNotificationService" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!--SYSQUO-->
+
+        <activity android:name=".SYSQUO.EmergencyCall.EmergencyCallActivity"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"></activity>
+        <activity android:name=".SYSQUO.Selection.SelectionActivity"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SYSQUO.Main.MainActivity"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SYSQUO.Video.VideoActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:launchMode="singleInstance"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:taskAffinity="com.package.pip"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- android:taskAffinity="" -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SYSQUO.Video.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName=".SYSQUO.Video.VideoActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SYSQUO.Video.VideoActivity" />
+        </activity> <!-- CHAT -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <activity
+            android:name=".SYSQUO.Chat.landing.LaunchActivity"
+            android:label="@string/app_name"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SYSQUO.Chat.landing.LoginActivity"
+            android:configChanges="locale|orientation"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".SYSQUO.Chat.chat.MainChatActivity_New"
+            android:configChanges="locale|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/title_activity_main_chat" />
+        <!--SYSQUO-->
+    </application>
+
+</manifest>
