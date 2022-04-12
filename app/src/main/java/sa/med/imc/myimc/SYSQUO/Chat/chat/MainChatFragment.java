@@ -28,6 +28,8 @@ import com.twilio.chat.StatusListener;
 
 import java.util.List;
 
+import sa.med.imc.myimc.Network.Constants;
+import sa.med.imc.myimc.Network.SharedPreferencesUtils;
 import sa.med.imc.myimc.R;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.JoinedStatusMessage;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.LeftStatusMessage;
@@ -186,7 +188,7 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   @Override
   public void onMessageAdded(Message message) {
 //    PIYUSH 28-03-2022
-    String me = "DRSHAH";
+    String me = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
     if(message.getAuthor().matches(me)) {
       try {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

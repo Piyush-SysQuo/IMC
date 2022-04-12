@@ -99,7 +99,7 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
 //        defaultChannelUniqueName = "test1";
 
         mrnNumber = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_MRN, null);
-        physician = "DRSHAH";
+        physician = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
         defaultChannelName  = mrnNumber+"_"+physician;
         defaultChannelUniqueName = mrnNumber+"_"+physician;
 
@@ -158,9 +158,9 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
         createRoomRequestModel.setPageNumber(0);
         createRoomRequestModel.setPageSize(0);
         String mrnNumber = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_MRN, null);
-        String physician = "DRSHAH";
+        String physician = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
         createRoomRequestModel.setRoomName(mrnNumber + "_" + physician);
-        createRoomRequestModel.setUserEmail("piyush@gmail.com");
+        createRoomRequestModel.setUserEmail("xyz@gmail.com");
         String token = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_ACCESS_TOKEN, null);
         viewModel.CreateRoom(token, createRoomRequestModel);
         viewModel.getVolumesResponseLiveData().observe(MainChatActivity_New.this, response -> {

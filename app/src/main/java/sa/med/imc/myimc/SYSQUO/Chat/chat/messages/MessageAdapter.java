@@ -19,6 +19,7 @@ import java.util.TreeSet;
 import sa.med.imc.myimc.Managebookings.view.ManageBookingsActivity;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
 import sa.med.imc.myimc.R;
+import sa.med.imc.myimc.SYSQUO.Video.VideoActivity;
 import sa.med.imc.myimc.SYSQUO.util.Constants;
 
 
@@ -105,7 +106,7 @@ public class MessageAdapter extends BaseAdapter {
         case TYPE_MESSAGE:
           ChatMessage message = messages.get(position);
 //          PIYUSH 28-0-2022
-          String identity = "DRSHAH";
+          String identity = SharedPreferencesUtils.getInstance(mContext).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
           if(!message.getAuthor().equals(identity))
           {
             res = R.layout.sysquo_message_send;
@@ -147,7 +148,7 @@ public class MessageAdapter extends BaseAdapter {
         case TYPE_MESSAGE:
           ChatMessage message = messages.get(position);
 //          PIYUSH 28-03-2022
-          String identity = "DRSHAH";
+          String identity = SharedPreferencesUtils.getInstance(mContext).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
           if(!message.getAuthor().equals(identity))
           {
             res = R.layout.sysquo_message_send;

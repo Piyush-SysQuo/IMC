@@ -109,6 +109,7 @@ public @interface Constants {
         String REFRESH_MAIN = "Refresh_Main";
         String REFRESH_MAIN_NOTIFICATION = "Refresh_notification";
         String UPDATE_HOME = "UPDATE_HOME";
+        String CHAT_NOTIFICATION = "CHAT_NOTIFICATION_BY_DOCTOR";
 
     }
 

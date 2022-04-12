@@ -1158,21 +1158,9 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
 //                if (booking.getTeleHealthLink() != null) {
                 if (booking.getApptDateString() != null) {
-                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, tvDoctorName.getText().toString());
+                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, booking.getDocCode());
                     String bookingDateTime = booking.getApptDateString();
-
-//                    Date today = new Date();
-//                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0");
-//                    String currentDateTimeS = format.format(today);
-//                    long differentInMiniutes = Common.findDifference(currentDateTimeS, bookingDateTime);
-//                    if(differentInMiniutes <= 10){
-                        gotoConsultConfirmation(booking);
-//                    }
-//                    else
-//                    {
-//                        gotoCheckTiming( booking);
-//                    }
-
+                    gotoConsultConfirmation(booking);
                 }
             }
         });
@@ -1352,9 +1340,9 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
             createRoomRequestModel.setPageNumber(0);
             createRoomRequestModel.setPageSize(0);
             String mrnNumber = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_MRN, null);
-            String physician = "DRSHAH";
+            String physician = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
             createRoomRequestModel.setRoomName(mrnNumber + "_" + physician);
-            createRoomRequestModel.setUserEmail("piyush@gmail.com");
+            createRoomRequestModel.setUserEmail("xyz@gmail.com");
             createRoomRequestModel.setBookingId(bookingId);
             createRoomRequestModel.setDoctorId(physician);
             createRoomRequestModel.setUserId(mrnNumber);

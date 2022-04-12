@@ -3,8 +3,11 @@ package sa.med.imc.myimc.SYSQUO.Video;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -35,6 +38,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.koushikdutta.ion.Ion;
@@ -226,7 +230,7 @@ public class VideoActivity extends AppCompatActivity {
         else {
             BUtton_ChatEnable.setVisibility(View.VISIBLE);
             mrnNumber = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(sa.med.imc.myimc.Network.Constants.KEY_USER_ID, null);
-            physician = "DRSHAH";
+            physician = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);;
             roomName = mrnNumber+"_"+physician;
         }
         ServerToken();
@@ -281,7 +285,11 @@ public class VideoActivity extends AppCompatActivity {
          */
         showWaitingDialog();
         intializeUI();
-
+        /*try {
+            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(Constants.Filter.CHAT_NOTIFICATION));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
         waitingProgressBar.setVisibility(View.GONE);
     }
 //------------------------------------------------------------------------------------------------\\
@@ -518,6 +526,7 @@ public class VideoActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         /*
          * Tear down audio management and restore previous volume stream
          */
@@ -838,6 +847,18 @@ public class VideoActivity extends AppCompatActivity {
         }
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
     }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
+    /*BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                pictureInPictureMode();;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };*/
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
     public  void setLocale(String languageCode) {

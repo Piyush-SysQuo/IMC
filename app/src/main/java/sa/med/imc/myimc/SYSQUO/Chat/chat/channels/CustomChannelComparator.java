@@ -15,7 +15,7 @@ public class CustomChannelComparator implements Comparator<Channel> {
   CustomChannelComparator() {
 //    PIYUSH 28-0-2022
     String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_MRN, null);
-    String physician = "DRSHAH";
+    String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
     defaultChannelName  = mrnNumber+"_"+physician;
   }
 

@@ -56,7 +56,7 @@ public class ChannelManager implements ChatClientListener  {
 //    defaultChannelUniqueName = "test1";
 
     String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(sa.med.imc.myimc.Network.Constants.KEY_MRN, null);
-    String physician = "DRSHAH";
+    String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
     defaultChannelName = mrnNumber+"_"+physician;
     defaultChannelUniqueName = mrnNumber+"_"+physician;
     handler = setupListenerHandler();
@@ -166,7 +166,7 @@ public class ChannelManager implements ChatClientListener  {
 //        mainChatActivity.stopActivityIndicator();
         Toast.makeText(ImcApplication.getInstance().getApplicationContext(), errorInfo.getMessage(), Toast.LENGTH_SHORT).show();
         String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_MRN, null);
-        String physician = "DRSHAH";
+        String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
         createChannelWithName(mrnNumber+"_"+physician, listener);
 //        createGeneralChannelWithCompletion(listener);
       }

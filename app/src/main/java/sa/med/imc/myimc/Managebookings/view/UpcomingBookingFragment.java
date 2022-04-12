@@ -408,7 +408,7 @@ public class UpcomingBookingFragment extends Fragment implements CheckInViews, B
             public void onGotoConsult(int position, String DrName) {
 //                if (upcomingList.get(position).getTeleHealthLink() != null) {
                 if (upcomingList.get(position).getApptDateString() != null) {
-                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, DrName);
+                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, upcomingList.get(position).getDocCode());
                     String bookingDateTime = upcomingList.get(position).getApptDateString();
 
 //                    Date today = new Date();
@@ -594,9 +594,9 @@ public class UpcomingBookingFragment extends Fragment implements CheckInViews, B
             createRoomRequestModel.setPageNumber(0);
             createRoomRequestModel.setPageSize(0);
             String mrnNumber = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_MRN, null);
-            String physician = "DRSHAH";
+            String physician = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
             createRoomRequestModel.setRoomName(mrnNumber + "_" + physician);
-            createRoomRequestModel.setUserEmail("piyush@gmail.com");
+            createRoomRequestModel.setUserEmail("xyz@gmail.com");
             createRoomRequestModel.setBookingId(bookingId);
             createRoomRequestModel.setDoctorId(physician);
             createRoomRequestModel.setUserId(mrnNumber);

@@ -80,9 +80,9 @@ public class SelectionActivity extends AppCompatActivity {
             createRoomRequestModel.setPageNumber(0);
             createRoomRequestModel.setPageSize(0);
             String mrnNumber = SharedPreferencesUtils.getInstance(this).getValue(sa.med.imc.myimc.Network.Constants.KEY_MRN, null);
-            String physician = "DRSHAH";
+            String physician = SharedPreferencesUtils.getInstance(this).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
             createRoomRequestModel.setRoomName(mrnNumber + "_" + physician);
-            createRoomRequestModel.setUserEmail("piyush@gmail.com");
+            createRoomRequestModel.setUserEmail("xyz@gmail.com");
             String token = SharedPreferencesUtils.getInstance(this).getValue(sa.med.imc.myimc.Network.Constants.KEY_ACCESS_TOKEN, null);
             viewModel.CreateRoom(token, createRoomRequestModel);
             viewModel.getVolumesResponseLiveData().observe(SelectionActivity.this, response -> {
