@@ -181,8 +181,12 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
     TextView tvAssessmentLabel;
     @BindView(R.id.upcoming_checkin_text)
     TextView upcomingCheckinText;
+    @BindView(R.id.upcoming_videoCall_text)
+    TextView upcomingVideoCallText;
     @BindView(R.id.upcoming_checkin_button)
     LinearLayout upcomingCheckinButton;
+    @BindView(R.id.upcoming_videoCall_button)
+    LinearLayout upcomingVideoCallButton;
 
     FragmentListener fragmentAdd;
     int page = 0, buffer_time = 0;
@@ -438,7 +442,7 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
     }
 
-    @OnClick({R.id.layAssessment, /*R.id.layPayment,*/R.id.fitness_and_wellness, R.id.iv_more, R.id.chatBot, R.id.lay_request_report, R.id.lay_symtom_tracker, R.id.lay_health_byte, R.id.lay_departments, R.id.lay_doc_profile, R.id.lay_mangeBookings, R.id.lay_medication, R.id.lay_lab_reports, R.id.lay_radiology, R.id.lay_find_doctor, R.id.lay_clinics, R.id.lay_virtual_family, R.id.lay_way_finder, R.id.lay_retail, R.id.lay_health_question, R.id.lay_health_summary, R.id.upcoming_checkin_text, R.id.emergency_video_call})
+    @OnClick({R.id.layAssessment, /*R.id.layPayment,*/R.id.fitness_and_wellness, R.id.iv_more, R.id.chatBot, R.id.lay_request_report, R.id.lay_symtom_tracker, R.id.lay_health_byte, R.id.lay_departments, R.id.lay_doc_profile, R.id.lay_mangeBookings, R.id.lay_medication, R.id.lay_lab_reports, R.id.lay_radiology, R.id.lay_find_doctor, R.id.lay_clinics, R.id.lay_virtual_family, R.id.lay_way_finder, R.id.lay_retail, R.id.lay_health_question, R.id.upcoming_videoCall_button, R.id.upcoming_checkin_text, R.id.emergency_video_call})
     public void onViewClicked(View view) {
 
         switch (view.getId()) {
@@ -566,7 +570,10 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                 break;
 
             case R.id.lay_mangeBookings:
-                ManageBookingsActivity.startActivityForResult(getActivity());
+                boolean navigation = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_NAV_CLASS, false);
+                if(!navigation) {
+                    ManageBookingsActivity.startActivityForResult(getActivity());
+                }
                 break;
 
             case R.id.lay_medication:
@@ -582,8 +589,12 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
             case R.id.lay_find_doctor:
 //                PhysiciansActivity.startActivity(getActivity());
-                if (fragmentAdd != null)
-                    fragmentAdd.openPhysicianFragment("PhysiciansFragment", "");
+                if (fragmentAdd != null) {
+                    boolean navigation2 = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_NAV_CLASS, false);
+                    if(!navigation2) {
+                        fragmentAdd.openPhysicianFragment("PhysiciansFragment", "");
+                    }
+                }
                 break;
 
             case R.id.lay_clinics:
@@ -608,11 +619,16 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
             case R.id.lay_health_summary:
                 if (SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.SELECTED_HOSPITAL, 1) == 1) {
-                    if (fragmentAdd != null)
-                        fragmentAdd.openHealthSummary("HealthSummaryFragment");
+                    if (fragmentAdd != null) {
+                        boolean navigation1 = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_NAV_CLASS, false);
+                        if(!navigation1) {
+                            fragmentAdd.openHealthSummary("HealthSummaryFragment");
+                        }
+                    }
                 } else {
-                    if (fragmentAdd != null)
+                    if (fragmentAdd != null) {
                         fragmentAdd.openLMSRecordFragment("LMSRecordFragment", Constants.TYPE.RECORD_LAB, "");
+                    }
                 }
                 break;
             case R.id.upcoming_checkin_text:
@@ -632,6 +648,22 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                     }
 
                 break;
+            case R.id.upcoming_videoCall_button:
+                String DrName = null;
+                if (booking.getGivenName() != null) {
+//                    if (booking.getFamilyName() != null) {
+//                        DrName =  "DR. " + booking.getGivenName() + " " + booking.getFamilyName();
+//                    }
+//                    else {
+//                        DrName= "DR. " + booking.getGivenName();
+//                    }
+                DrName = getResources().getString(R.string.dr) + " " + booking.getGivenName()+" - "+booking.getClinicDescEn();
+                }
+
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, DrName);
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, booking.getDocCode());
+                clickToStartVideoCall(booking.getId(), booking.getApptDateString());
+                break;
 //                if (booking.getPaymentStatus() == 0) {
 //                    String selected_date = Common.getConvertToPriceDate(booking.getApptDateString());
 //
@@ -645,10 +677,13 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
 
             case R.id.emergency_video_call:
-                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_EMERGENCY_CALL, true);
-                Intent in = new Intent(getActivity(), EmergencyCallActivity.class);
-                startActivity(in);
-                getActivity().finish();
+                boolean navigation3 = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_NAV_CLASS, false);
+                if(!navigation3) {
+                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_EMERGENCY_CALL, true);
+                    Intent in = new Intent(getActivity(), EmergencyCallActivity.class);
+                    startActivity(in);
+                    getActivity().finish();
+                }
                 break;
         }
     }
@@ -874,7 +909,8 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                 if (booking.getClinicDescAr() != null)
                     tvClinic.setText(Html.fromHtml(booking.getClinicDescAr()));
 
-            } else {
+            }
+            else {
                 if (booking.getGivenName() != null)
                     if (booking.getFamilyName() != null)
                         tvDoctorName.setText(Html.fromHtml("DR. " + booking.getGivenName() + " " + booking.getFamilyName()));
@@ -915,7 +951,8 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                     tvArrivedLabel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                 }*/
 
-            } else if (booking.getPaymentStatus() == 0) {
+            }
+            else if (booking.getPaymentStatus() == 0) {
                 if (booking.isSelfCheckIn() == false)//value.selfCheckIn == 0
                 {
                     ic_error_red.setVisibility(View.GONE);
@@ -932,7 +969,8 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                     /*tvArrivalValue.setText(this.getString(R.string.no));
                     tvArrivedLabel.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_error_red, 0);*/
                 }
-            } else if (booking.getPaymentStatus() == 1) {
+            }
+            else if (booking.getPaymentStatus() == 1) {
                 ic_error_red.setVisibility(View.GONE);
                 tvPaymentValue.setText(this.getString(R.string.paid));
                 tvPaymentLabel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
@@ -958,7 +996,8 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
 
                     });
                 }
-            } else {
+            }
+            else {
                 upcomingCheckinText.setText(R.string.checked_in);
                 upcomingCheckinText.setTextColor(Color.GREEN);
                 upcomingCheckinButton.setBackground(null);
@@ -980,12 +1019,22 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                     tvAssessmentValue.setText("0");
                     tvAssessmentLabel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
                 }
-            } else {
+            }
+            else {
                 Log.d("Home Fragment", "setData: Inside else block");
                 tvAssessmentValue.setText("0");
                 tvAssessmentLabel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
 //                ic_error_red.setVisibility(View.GONE);
+            }
+
+            //TeleMedicine
+            if(booking.getTeleBooking() == 1){
+                upcomingVideoCallButton.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                upcomingVideoCallButton.setVisibility(View.GONE);
             }
 
             /*
@@ -1409,6 +1458,9 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                                 permissionToken.continuePermissionRequest();
                             }
                         }).check();
+                    }
+                    else{
+                        Common.hideDialog();
                     }
                 } else {
                     Common.hideDialog();

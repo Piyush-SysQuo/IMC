@@ -135,9 +135,7 @@ public class CreateRoomResponseModel {
         @Expose
         @SerializedName("mediaRegion")
         private String mediaRegion;
-        @Expose
-        @SerializedName("videoCodecs")
-        private String videoCodecs;
+
         @Expose
         @SerializedName("recordParticipantsOnConnect")
         private boolean recordParticipantsOnConnect;
@@ -198,13 +196,6 @@ public class CreateRoomResponseModel {
             this.mediaRegion = mediaRegion;
         }
 
-        public String getVideoCodecs() {
-            return videoCodecs;
-        }
-
-        public void setVideoCodecs(String videoCodecs) {
-            this.videoCodecs = videoCodecs;
-        }
 
         public boolean getRecordParticipantsOnConnect() {
             return recordParticipantsOnConnect;

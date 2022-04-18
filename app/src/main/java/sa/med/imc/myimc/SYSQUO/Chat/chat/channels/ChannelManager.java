@@ -31,7 +31,7 @@ import sa.med.imc.myimc.SYSQUO.Chat.chat.accesstoken.AccessTokenFetcher;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.listeners.TaskCompletionListener;
 
 
-public class ChannelManager implements ChatClientListener  {
+public class ChannelManager implements ChatClientListener {
   private static ChannelManager sharedManager = new ChannelManager();
   public Channel generalChannel;
   private ChatClientManager chatClientManager;
@@ -43,18 +43,11 @@ public class ChannelManager implements ChatClientListener  {
   private String defaultChannelUniqueName;
   private Handler handler;
   private Boolean isRefreshingChannels = false;
-  private MainChatActivity_New mainChatActivity;
 
   private ChannelManager() {
     this.chatClientManager = ImcApplication.getInstance().getChatClientManager();
-    this.mainChatActivity = ImcApplication.getInstance().getMainChatActivity();
     this.channelExtractor = new ChannelExtractor();
     this.listener = this;
-    String TAG = "TwilioChat";
-//    defaultChannelName = "test1";
-//    defaultChannelUniqueName = "test1";
-//    defaultChannelUniqueName = "test1";
-
     String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(sa.med.imc.myimc.Network.Constants.KEY_MRN, null);
     String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
     defaultChannelName = mrnNumber+"_"+physician;
@@ -88,7 +81,22 @@ public class ChannelManager implements ChatClientListener  {
     }
     this.isRefreshingChannels = true;
 
-    handler.post(new Runnable() {
+//    handler.post(new Runnable() {
+//      @Override
+//      public void run() {
+//        channelsObject = chatClientManager.getChatClient().getChannels();
+//
+//        channelsObject.getPublicChannelsList(new CallbackListener<Paginator<ChannelDescriptor>>() {
+//          @Override
+//          public void onSuccess(Paginator<ChannelDescriptor> channelDescriptorPaginator) {
+//            extractChannelsFromPaginatorAndPopulate(channelDescriptorPaginator, listener);
+//          }
+//        });
+//
+//      }
+//    });
+    final Handler handler1 = new Handler(Looper.getMainLooper());
+    handler1.postDelayed(new Runnable() {
       @Override
       public void run() {
         channelsObject = chatClientManager.getChatClient().getChannels();
@@ -99,9 +107,8 @@ public class ChannelManager implements ChatClientListener  {
             extractChannelsFromPaginatorAndPopulate(channelDescriptorPaginator, listener);
           }
         });
-
       }
-    });
+    }, 1000);
   }
 
   private void extractChannelsFromPaginatorAndPopulate(final Paginator<ChannelDescriptor> channelsPaginator,
@@ -130,13 +137,11 @@ public class ChannelManager implements ChatClientListener  {
     this.channelsObject
             .channelBuilder()
             .withFriendlyName(name)
-            .withUniqueName(name)
             .withType(ChannelType.PUBLIC)
             .build(new CallbackListener<Channel>() {
               @Override
               public void onSuccess(final Channel newChannel) {
                 handler.onSuccess();
-                return;
               }
 
               @Override
@@ -147,8 +152,6 @@ public class ChannelManager implements ChatClientListener  {
   }
 
   public void joinOrCreateGeneralChannelWithCompletion(final StatusListener listener) {
-
-//    channelsObject = chatClientManager.getChatClient().getChannels();
     channelsObject.getChannel(defaultChannelUniqueName, new CallbackListener<Channel>() {
       @Override
       public void onSuccess(Channel channel) {
@@ -159,32 +162,11 @@ public class ChannelManager implements ChatClientListener  {
           createGeneralChannelWithCompletion(listener);
         }
       }
-
-      @Override
-      public void onError(ErrorInfo errorInfo) {
-//        piyush
-//        mainChatActivity.stopActivityIndicator();
-        Toast.makeText(ImcApplication.getInstance().getApplicationContext(), errorInfo.getMessage(), Toast.LENGTH_SHORT).show();
-        String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_MRN, null);
-        String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
-        createChannelWithName(mrnNumber+"_"+physician, listener);
-//        createGeneralChannelWithCompletion(listener);
-      }
     });
   }
 
   private void joinGeneralChannelWithCompletion(final StatusListener listener) {
-    Channel.ChannelStatus a = generalChannel.getStatus();
-    /*List<Member> list = generalChannel.getMembers().getMembersList();
-    for(int i = 0; i <= list.size(); i++)
-    {
-      if(list.get(i).getIdentity().matches(SessionManager.getInstance().getIdentity()))
-      {
-        listener.onSuccess();
-        return;
-      }
-    }*/
-    if (a == Channel.ChannelStatus.JOINED) {
+    if (generalChannel.getStatus() == Channel.ChannelStatus.JOINED) {
       listener.onSuccess();
       return;
     }

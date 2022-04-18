@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 
 import sa.med.imc.myimc.Appointmnet.view.AppointmentActivity;
+import sa.med.imc.myimc.MainActivity;
 import sa.med.imc.myimc.Network.Constants;
 import sa.med.imc.myimc.Network.ImcApplication;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
@@ -52,6 +53,8 @@ import sa.med.imc.myimc.SYSQUO.Selection.SelectionActivity;
 import sa.med.imc.myimc.SYSQUO.Selection.ViewModel.CreateRoomViewModel;
 import sa.med.imc.myimc.SYSQUO.Video.VideoActivity;
 import sa.med.imc.myimc.SYSQUO.util.Progress;
+import sa.med.imc.myimc.SplashActivity;
+import sa.med.imc.myimc.Utils.Common;
 
 
 public class MainChatActivity_New extends AppCompatActivity implements ChatClientListener {
@@ -72,6 +75,9 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
     private Channels channelsObject;
     String mrnNumber, physician;
     Progress progress;
+    Channel selectedChannel;
+    String drName = null;
+    public static MainChatActivity_New mainChatActivity_new;
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -89,44 +95,51 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sysquo_activity_main_chat_new);
 
-        progress = new Progress(this);
-        (Objects.requireNonNull(progress.getWindow())).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progress.setCanceledOnTouchOutside(false);
-        progress.setCancelable(false);
+        try {
 
-        ChatClientManager clientManager = ImcApplication.getInstance().getChatClientManager();
+            channelManager = ChannelManager.getInstance();
+            mainChatActivity_new = this;
+
+            progress = new Progress(this);
+            (Objects.requireNonNull(progress.getWindow())).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            progress.setCanceledOnTouchOutside(false);
+            progress.setCancelable(false);
+
+            ChatClientManager clientManager = ImcApplication.getInstance().getChatClientManager();
 //        defaultChannelName  = "test1";
 //        defaultChannelUniqueName = "test1";
 
-        mrnNumber = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_MRN, null);
-        physician = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
-        defaultChannelName  = mrnNumber+"_"+physician;
-        defaultChannelUniqueName = mrnNumber+"_"+physician;
+            mrnNumber = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_MRN, null);
+            physician = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
+            defaultChannelName = mrnNumber + "_" + physician;
+            defaultChannelUniqueName = mrnNumber + "_" + physician;
 
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-        chatFragment = new MainChatFragment();
-        fragmentTransaction.add(R.id.fragment_container, chatFragment);
-        fragmentTransaction.commit();
+            chatFragment = new MainChatFragment();
+            fragmentTransaction.add(R.id.fragment_container, chatFragment);
+            fragmentTransaction.commit();
 
-        context = this;
-        mainActivity = this;
+            context = this;
+            mainActivity = this;
 
-        TextView_ChatUserName       = (TextView) findViewById(R.id.TextView_ChatUserName);
+            TextView_ChatUserName = (TextView) findViewById(R.id.TextView_ChatUserName);
 //        channelsListView            = (ListView) findViewById(R.id.listViewChannels);
-        ImageView_ChateVideoCall    = (ImageView) findViewById(R.id.ImageView_ChateVideoCall);
-        ImageView_ChateBackpressed  = (ImageView) findViewById(R.id.ImageView_ChateBackpressed);
+            ImageView_ChateVideoCall = (ImageView) findViewById(R.id.ImageView_ChateVideoCall);
+            ImageView_ChateBackpressed = (ImageView) findViewById(R.id.ImageView_ChateBackpressed);
+            setUsernameTextView();
 
-        channelManager              = ChannelManager.getInstance();
-        setUsernameTextView();
-
-        setUpListeners();
-        checkTwilioClient();
+            setUpListeners();
+            checkTwilioClient();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
     private void setUsernameTextView() {
-        TextView_ChatUserName.setText(physician);
+        drName = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, "");
+        TextView_ChatUserName.setText(drName);
     }
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
@@ -144,7 +157,11 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
         ImageView_ChateBackpressed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onBackPressed();
+                SharedPreferencesUtils.getInstance(MainChatActivity_New.this).setValue(Constants.KEY_NAV_CLASS, true);
+                Intent in = new Intent(MainChatActivity_New.this, MainActivity.class);
+                in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                startActivity(in);
+//                finish();
             }
         });
     }
@@ -244,30 +261,10 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
 //------------------------------------------------------------------------------------------------//
     public void populateChannels()
     {
-        /*channelManager.setChannelListener(this);
-        channelManager
-                .joinOrCreateGeneralChannelWithCompletion(new StatusListener() {
-                    @Override
-                    public void onSuccess() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                populateChannelsSecond();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(ErrorInfo errorInfo) {
-                        showAlertWithMessage(getStringResource(R.string.generic_error) + " - " + errorInfo.getMessage());
-                    }
-                });*/
         channelManager.setChannelListener(this);
         channelManager.populateChannels(new LoadChannelListener() {
             @Override
             public void onChannelsFinishedLoading(List<Channel> channels) {
-                channelAdapter = new ChannelAdapter(mainActivity, channels);
-    //                channelsListView.setAdapter(channelAdapter);
                 MainChatActivity_New.this.channelManager
                         .joinOrCreateGeneralChannelWithCompletion(new StatusListener() {
                             @Override
@@ -296,8 +293,6 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
         channelManager.populateChannels(new LoadChannelListener() {
             @Override
             public void onChannelsFinishedLoading(List<Channel> channels) {
-                channelAdapter = new ChannelAdapter(mainActivity, channels);
-                //                channelsListView.setAdapter(channelAdapter);
                 MainChatActivity_New.this.channelManager
                         .joinOrCreateGeneralChannelWithCompletion(new StatusListener() {
                             @Override
@@ -327,31 +322,37 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
             return;
         }
         final Channel currentChannel = chatFragment.getCurrentChannel();
-        final Channel selectedChannel = channels.get(position);
-        if (currentChannel != null && currentChannel.getSid().contentEquals(selectedChannel.getSid())) {
-    //            drawer.closeDrawer(GravityCompat.START);
-            return;
-        }
-    //        hideMenuItems(position);
-        if (selectedChannel != null) {
-            showActivityIndicator("Joining " + selectedChannel.getFriendlyName() + " channel");
-            TextView_ChatUserName.setText(selectedChannel.getFriendlyName());
-            if (currentChannel != null && currentChannel.getStatus() == Channel.ChannelStatus.JOINED) {
-                this.channelManager.leaveChannelWithHandler(currentChannel, new StatusListener() {
-                    @Override
-                    public void onSuccess() {
-                        joinChannel(selectedChannel);
-                    }
-
-                    @Override
-                    public void onError(ErrorInfo errorInfo) {
-                        stopActivityIndicator();
-                    }
-                });
-                return;
+        selectedChannel = null;
+        if(channels.size() >0) {
+            for (int i = 0; i < channels.size(); i++) {
+                if (channels.get(i).getFriendlyName().equals(defaultChannelUniqueName)) {
+                    selectedChannel = channels.get(i);
+                }
             }
+        }
+//        final Channel selectedChannel = channels.get(position);
+//        if (currentChannel != null && currentChannel.getSid().contentEquals(selectedChannel.getSid())) {
+//            return;
+//        }
+        if (selectedChannel != null) {
+//            showActivityIndicator("Joining " + selectedChannel.getFriendlyName() + " channel");
+            TextView_ChatUserName.setText(drName);
+//            if (currentChannel != null && currentChannel.getStatus() == Channel.ChannelStatus.JOINED) {
+//                this.channelManager.leaveChannelWithHandler(currentChannel, new StatusListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        joinChannel(selectedChannel);
+//                    }
+//
+//                    @Override
+//                    public void onError(ErrorInfo errorInfo) {
+//                        stopActivityIndicator();
+//                    }
+//                });
+//                return;
+//            }
             joinChannel(selectedChannel);
-            stopActivityIndicator();
+//            stopActivityIndicator();
         } else {
             stopActivityIndicator();
             showAlertWithMessage(getStringResource(R.string.generic_error));
@@ -367,11 +368,13 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
                 chatFragment.setCurrentChannel(selectedChannel, new StatusListener() {
                     @Override
                     public void onSuccess() {
+                        stopActivityIndicator();
                         MainChatActivity_New.this.stopActivityIndicator();
                     }
 
                     @Override
                     public void onError(ErrorInfo errorInfo) {
+//                        Common.makeToast(MainChatActivity_New.this, errorInfo.getMessage());
                     }
                 });
     //                setTitle(selectedChannel.getFriendlyName());

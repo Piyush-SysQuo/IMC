@@ -48,12 +48,14 @@ public @interface Constants {
     String KEY_CHATBOT_LINK = "key_chatbot_link";
 
     String KEY_VIDEO_PHYSICIAN = "key_video_physician";
+    String KEY_VIDEO_PHYSICIAN_NAME = "key_video_physician_name";
     String KEY_VIDEO_ROOM_ID = "key_video_room_id";
     String KEY_VIDEO_ACCESS_TOKEN = "key_video_access_token";
     String KEY_VIDEO_BACK_CLASS = "key_video_back_class";
     String KEY_EMERGENCY_CALL = "key_emergency_call";
     String KEY_VIDEO_ROOMNAME = "key_video_roomname";
     String KEY_CHAT_CHANNELNAME = "key_chat_channelname";
+    String KEY_NAV_CLASS = "key_nav_class";
 
 
     @interface IntentKey {
@@ -109,7 +111,7 @@ public @interface Constants {
         String REFRESH_MAIN = "Refresh_Main";
         String REFRESH_MAIN_NOTIFICATION = "Refresh_notification";
         String UPDATE_HOME = "UPDATE_HOME";
-        String CHAT_NOTIFICATION = "CHAT_NOTIFICATION_BY_DOCTOR";
+        String CHAT_NOTIFICATION = "CHAT_NOTIFICATION";
 
     }
 

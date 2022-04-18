@@ -2,10 +2,14 @@ package sa.med.imc.myimc.SYSQUO.Chat.chat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +31,7 @@ import com.twilio.chat.Messages;
 import com.twilio.chat.StatusListener;
 
 import java.util.List;
+import java.util.Objects;
 
 import sa.med.imc.myimc.Network.Constants;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
@@ -35,6 +40,8 @@ import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.JoinedStatusMessage;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.LeftStatusMessage;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.MessageAdapter;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.StatusMessage;
+import sa.med.imc.myimc.SYSQUO.util.Progress;
+import sa.med.imc.myimc.Utils.Common;
 
 public class MainChatFragment extends Fragment implements ChannelListener {
   Context context;
@@ -47,6 +54,7 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   Channel currentChannel;
   Messages messagesObject;
 
+  Progress progress;
   public MainChatFragment() {
   }
 
@@ -66,6 +74,12 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.sysquo_fragment_main_chat, container, false);
+
+    progress = new Progress(getActivity());
+    (Objects.requireNonNull(progress.getWindow())).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    progress.setCanceledOnTouchOutside(false);
+    progress.setCancelable(false);
+
     sendButton = (Button) view.findViewById(R.id.buttonSend);
     messagesListView = (ListView) view.findViewById(R.id.listViewMessages);
     messageTextEdit = (EditText) view.findViewById(R.id.editTextMessage);
@@ -93,25 +107,43 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   }
 
   public void setCurrentChannel(Channel currentChannel, final StatusListener handler) {
+    showActivityIndicator("");
     if (currentChannel == null) {
       this.currentChannel = null;
+//      Common.makeToast(getActivity(), "Retrun");
       return;
     }
     if (!currentChannel.equals(this.currentChannel)) {
       setMessageInputEnabled(false);
       this.currentChannel = currentChannel;
       this.currentChannel.addListener(this);
+      messagesObject = currentChannel.getMessages();
       if (this.currentChannel.getStatus() == Channel.ChannelStatus.JOINED) {
-        loadMessages(handler);
-      } else {
+//        Common.makeToast(getActivity(), "Joined "+currentChannel.getFriendlyName());
+        final Handler handler1 = new Handler(Looper.getMainLooper());
+        handler1.postDelayed(new Runnable() {
+          @Override
+          public void run() {
+            loadMessages(handler);
+            stopActivityIndicator();
+          }
+        }, 2000);
+
+
+      }
+      else
+      {
+        stopActivityIndicator();
         this.currentChannel.join(new StatusListener() {
           @Override
           public void onSuccess() {
+//            Common.makeToast(getActivity(), "Join Success "+currentChannel.getFriendlyName());
             loadMessages(handler);
           }
 
           @Override
           public void onError(ErrorInfo errorInfo) {
+//            Common.makeToast(getActivity(), "Joining "+errorInfo.getMessage());
           }
         });
       }
@@ -119,26 +151,21 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   }
 
   private void loadMessages(final StatusListener handler) {
-    this.messagesObject = this.currentChannel.getMessages();
+    messagesObject = currentChannel.getMessages();
 
     if (messagesObject != null) {
       messagesObject.getLastMessages(100, new CallbackListener<List<Message>>() {
         @Override
         public void onSuccess(List<Message> messageList) {
-
-          try {
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getActivity(), notification);
-            r.play();
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
           messageAdapter.setMessages(messageList);
           setMessageInputEnabled(true);
           messageTextEdit.requestFocus();
           handler.onSuccess();
         }
       });
+    }
+    else {
+//      Common.makeToast(getActivity(), "Message Object is null ");
     }
   }
 
@@ -187,17 +214,6 @@ public class MainChatFragment extends Fragment implements ChannelListener {
 
   @Override
   public void onMessageAdded(Message message) {
-//    PIYUSH 28-03-2022
-    String me = SharedPreferencesUtils.getInstance(getActivity()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
-    if(message.getAuthor().matches(me)) {
-      try {
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone r = RingtoneManager.getRingtone(getActivity(), notification);
-        r.play();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
     messageAdapter.addMessage(message);
   }
 
@@ -237,5 +253,30 @@ public class MainChatFragment extends Fragment implements ChannelListener {
   public void onSynchronizationChanged(Channel channel) {
   }
 
-
+  public void stopActivityIndicator() {
+    getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+                /*if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }*/
+        if(progress.isShowing()){
+          progress.dismiss();
+        }
+      }
+    });
+  }
+  private void showActivityIndicator(final String message) {
+    getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+                /*progressDialog = new ProgressDialog(MainChatActivity_New.this.mainActivity);
+                progressDialog.setMessage(message);
+                progressDialog.show();
+                progressDialog.setCanceledOnTouchOutside(false);
+                progressDialog.setCancelable(false);*/
+        progress.show();
+      }
+    });
+  }
 }

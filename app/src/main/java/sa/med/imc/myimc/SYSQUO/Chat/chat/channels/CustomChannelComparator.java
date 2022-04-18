@@ -9,14 +9,13 @@ import sa.med.imc.myimc.Network.ImcApplication;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
 
 
-public class CustomChannelComparator implements Comparator<Channel> {
+public class CustomChannelComparator  implements Comparator<Channel> {
   private String defaultChannelName;
 
   CustomChannelComparator() {
-//    PIYUSH 28-0-2022
-    String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_MRN, null);
+    String mrnNumber = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(sa.med.imc.myimc.Network.Constants.KEY_MRN, null);
     String physician = SharedPreferencesUtils.getInstance(ImcApplication.getInstance()).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);
-    defaultChannelName  = mrnNumber+"_"+physician;
+    defaultChannelName = mrnNumber+"_"+physician;
   }
 
   @Override

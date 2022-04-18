@@ -85,7 +85,18 @@ public class MyFirebaseMessagningService extends FirebaseMessagingService {
 //                i1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 sendNotification(maindata, new Intent(), title);
 
-            } else {
+            }
+            else if (type.equalsIgnoreCase("S"))
+            {
+                try {
+                    Intent chat = new Intent(Constants.Filter.CHAT_NOTIFICATION);
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(chat);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+            else {
                 SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NOTIFICATION_UNREAD, "1");
                 sendNotification(maindata, new Intent(), title);
             }

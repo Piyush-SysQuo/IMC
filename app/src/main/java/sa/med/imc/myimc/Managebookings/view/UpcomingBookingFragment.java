@@ -409,6 +409,7 @@ public class UpcomingBookingFragment extends Fragment implements CheckInViews, B
 //                if (upcomingList.get(position).getTeleHealthLink() != null) {
                 if (upcomingList.get(position).getApptDateString() != null) {
                     SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, upcomingList.get(position).getDocCode());
+                    SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, DrName);
                     String bookingDateTime = upcomingList.get(position).getApptDateString();
 
 //                    Date today = new Date();
@@ -423,6 +424,14 @@ public class UpcomingBookingFragment extends Fragment implements CheckInViews, B
 //                        gotoCheckTiming(position, upcomingList.get(position).getId(), bookingDateTime);
 //                    }
                 }
+            }
+
+            @Override
+            public void videoCall(int position, String DrName) {
+
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, upcomingList.get(position).getDocCode());
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, DrName);
+                clickToStartVideoCall(upcomingList.get(position).getId(),upcomingList.get(position).getApptDateString());
             }
 
             @Override

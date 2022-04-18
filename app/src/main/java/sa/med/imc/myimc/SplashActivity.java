@@ -25,7 +25,7 @@ public class SplashActivity extends AppCompatActivity {
             finish();
             return;
         }
-
+        SharedPreferencesUtils.getInstance(SplashActivity.this).setValue(Constants.KEY_VIDEO_PHYSICIAN, false);
         String lang = SharedPreferencesUtils.getInstance(SplashActivity.this).getValue(Constants.KEY_LOGIN_LANGUAGE, Constants.ENGLISH);
 
         SharedPreferencesUtils.getInstance(SplashActivity.this).setValue(Constants.KEY_LANGUAGE, lang);

@@ -273,6 +273,15 @@ public class UpcomingBookingAdapter extends RecyclerView.Adapter<UpcomingBooking
             }
         }
 
+        //TeleMedicine
+        if(booking.getTeleBooking() == 1){
+            holder.upcomingVideoCallButton.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            holder.upcomingVideoCallButton.setVisibility(View.GONE);
+        }
+
 
         if (booking.getTeleBooking() != 0) {
             holder.ic_error_red.setVisibility(View.VISIBLE);
@@ -291,6 +300,17 @@ public class UpcomingBookingAdapter extends RecyclerView.Adapter<UpcomingBooking
             @Override
             public void onClick(View view) {
                 showListPopUp(holder.iv_more, context, onItemClickListener, position, booking);
+
+            }
+        });
+
+        holder.upcomingVideoCallButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                if (booking.getFamilyName() != null)
+//                    onItemClickListener.videoCall(position, context.getString(R.string.dr) + " " + booking.getGivenName() + " " + booking.getFamilyName());
+//                else
+                    onItemClickListener.videoCall(position, context.getString(R.string.dr) + " " + booking.getGivenName()+" - "+booking.getClinicDescEn());
 
             }
         });
@@ -391,8 +411,12 @@ public class UpcomingBookingAdapter extends RecyclerView.Adapter<UpcomingBooking
         LinearLayout layAssessment;
         @BindView(R.id.upcoming_checkin_text)
         TextView upcomingCheckinText;
+        @BindView(R.id.upcoming_videoCall_text)
+        TextView upcomingVideoCallText;
         @BindView(R.id.upcoming_checkin_button)
         LinearLayout upcomingCheckinButton;
+        @BindView(R.id.upcoming_videoCall_button)
+        LinearLayout upcomingVideoCallButton;
 /*        @BindView(R.id.layPayment)
         LinearLayout layPayment;*/
 
@@ -411,6 +435,8 @@ public class UpcomingBookingAdapter extends RecyclerView.Adapter<UpcomingBooking
         void onProfileClick(int position);
 //        PIYUSH-24-03-22
         void onGotoConsult(int position, String DrName);
+
+        void videoCall(int position, String DrName);
 
         void onStartAssessment(int position);
 

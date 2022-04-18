@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.PictureInPictureParams;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Rational;
@@ -37,6 +39,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -92,16 +96,13 @@ import sa.med.imc.myimc.SYSQUO.Chat.application.SessionManager;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.MainChatActivity_New;
 import sa.med.imc.myimc.SYSQUO.EmergencyCall.Model.LeaveEmergencyCallRequestModel;
 import sa.med.imc.myimc.SYSQUO.EmergencyCall.ViewModel.LeaveEmergencyCallViewModel;
-import sa.med.imc.myimc.SYSQUO.Selection.SelectionActivity;
 import sa.med.imc.myimc.SYSQUO.Video.ExitRoom.Model.DisconnectRoomRequestModel;
 import sa.med.imc.myimc.SYSQUO.Video.ExitRoom.Model.ExitRoomRequestModel;
 import sa.med.imc.myimc.SYSQUO.Video.ExitRoom.ViewModel.DisconnectRoomViewModel;
 import sa.med.imc.myimc.SYSQUO.Video.ExitRoom.ViewModel.ExitRoomViewModel;
 import sa.med.imc.myimc.SYSQUO.Video.JoningRequest.ConferenceJoiningReqViewModel;
 import sa.med.imc.myimc.SYSQUO.Video.JoningRequest.ConferenceJoiningRequestMode;
-import sa.med.imc.myimc.SYSQUO.Video.VideoToken.ServerTokenViewModel;
 import sa.med.imc.myimc.SYSQUO.util.CameraCapturerCompat;
-import sa.med.imc.myimc.SYSQUO.util.Constant;
 import sa.med.imc.myimc.SYSQUO.util.Dialog;
 import tvi.webrtc.VideoSink;
 
@@ -136,7 +137,7 @@ public class VideoActivity extends AppCompatActivity {
     /*
      * A Room represents communication between a local participant and one or more participants.
      */
-    private Room room;
+    public Room room;
     private LocalParticipant localParticipant;
 
     /*
@@ -199,16 +200,19 @@ public class VideoActivity extends AppCompatActivity {
     AlertDialog alertDialog = null;
     boolean partconnect = false;
     boolean isInPictureInPicture = false;
+    boolean homeButtonPressed = false;
     String physician, mrnNumber;
     int roomID = 0;
-//    Network Quality Check
+    public static VideoActivity videoActivity;
+    boolean mBackstackLost = false;
+    //    Network Quality Check
     NetworkQualityConfiguration configuration;
     ConnectOptions connectOptions;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sysquo_activity_video);
-
+        videoActivity = this;
 
         configuration =
                 new NetworkQualityConfiguration(
@@ -285,11 +289,11 @@ public class VideoActivity extends AppCompatActivity {
          */
         showWaitingDialog();
         intializeUI();
-        /*try {
+        try {
             LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter(Constants.Filter.CHAT_NOTIFICATION));
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
         waitingProgressBar.setVisibility(View.GONE);
     }
 //------------------------------------------------------------------------------------------------\\
@@ -301,6 +305,7 @@ public class VideoActivity extends AppCompatActivity {
         }
         else {
             room.disconnect();
+            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
             if (SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)) {
                 LeaveEmergencyRoom();
             } else {
@@ -525,13 +530,8 @@ public class VideoActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-        /*
-         * Tear down audio management and restore previous volume stream
-         */
-        audioSwitch.stop();
-        setVolumeControlStream(savedVolumeControlStream);
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
 
         /*
          * Always disconnect from the room before leaving the Activity to
@@ -539,6 +539,7 @@ public class VideoActivity extends AppCompatActivity {
          */
         if (room != null && room.getState() != Room.State.DISCONNECTED) {
             room.disconnect();
+            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
 
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                 LeaveEmergencyRoom();
@@ -548,6 +549,11 @@ public class VideoActivity extends AppCompatActivity {
             }
             disconnectedFromOnDestroy = true;
         }
+        /*
+         * Tear down audio management and restore previous volume stream
+         */
+        audioSwitch.stop();
+        setVolumeControlStream(savedVolumeControlStream);
 
         /*
          * Release the local audio and video tracks ensuring any memory allocated to audio
@@ -562,6 +568,7 @@ public class VideoActivity extends AppCompatActivity {
             localVideoTrack = null;
         }
 
+//        Process.killProcess(Process.myPid());
         super.onDestroy();
     }
 
@@ -754,6 +761,7 @@ public class VideoActivity extends AppCompatActivity {
     @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
+        homeButtonPressed = true;
         if(!SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 if (!isInPictureInPictureMode()) {
@@ -783,9 +791,19 @@ public class VideoActivity extends AppCompatActivity {
             }
 
             if (!SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)) {
-                Intent in = new Intent(this, MainChatActivity_New.class);
-                in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                startActivity(in);
+                if(!homeButtonPressed) {
+                    try {
+                        Intent in = new Intent(VideoActivity.this, MainChatActivity_New.class);
+                        in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(in);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    homeButtonPressed = false;
+                }
             }
             else
             {
@@ -799,6 +817,7 @@ public class VideoActivity extends AppCompatActivity {
             if (onStopCalled) {
                 if (room != null && room.getState() != Room.State.DISCONNECTED) {
                     room.disconnect();
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
                 }
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
@@ -826,6 +845,14 @@ public class VideoActivity extends AppCompatActivity {
                 }
             }
             else {
+                mBackstackLost = true;
+                try {
+//                    Intent in = new Intent(this, MainActivity.class);
+//                    startActivity(in);
+//                    finish();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 disconnect_action_fab.setVisibility(View.VISIBLE);
                 muteActionFab.setVisibility(View.VISIBLE);
                 Button_VoiceLowHigh.setVisibility(View.VISIBLE);
@@ -849,16 +876,18 @@ public class VideoActivity extends AppCompatActivity {
     }
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
-    /*BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                pictureInPictureMode();;
+                pictureInPictureMode();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-    };*/
+    };
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
     public  void setLocale(String languageCode) {
@@ -1072,7 +1101,12 @@ public class VideoActivity extends AppCompatActivity {
 
     private void moveLocalVideoToThumbnailView() {
 //        if (thumbnailVideoView.getVisibility() == View.GONE) {
+        if(isInPictureInPicture){
+            thumbnailVideoView.setVisibility(View.GONE);
+        }
+        else {
             thumbnailVideoView.setVisibility(View.VISIBLE);
+        }
             localVideoTrack.removeSink(primaryVideoView);
             localVideoTrack.addSink(thumbnailVideoView);
             localVideoView = thumbnailVideoView;
@@ -1126,6 +1160,7 @@ public class VideoActivity extends AppCompatActivity {
                             == CameraCapturerCompat.Source.FRONT_CAMERA);
             if (room != null && room.getState() != Room.State.DISCONNECTED) {
                 room.disconnect();
+                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
             }
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
              LeaveEmergencyRoom();
@@ -1168,6 +1203,7 @@ public class VideoActivity extends AppCompatActivity {
                                 == CameraCapturerCompat.Source.FRONT_CAMERA);
                 if (room != null && room.getState() != Room.State.DISCONNECTED) {
                     room.disconnect();
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
                 }
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
@@ -1606,6 +1642,7 @@ public class VideoActivity extends AppCompatActivity {
              */
             if (room != null) {
                 room.disconnect();
+                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
                 }
@@ -1679,10 +1716,10 @@ public class VideoActivity extends AppCompatActivity {
                 localVideoTrack.enable(enable);
                 int icon;
                 if (enable) {
-                    icon = R.drawable.sysquo_ic_pause;
+                    icon = R.drawable.sysquo_video_pause;
 //                    switchCameraActionFab.show();
                 } else {
-                    icon = R.drawable.sysquo_ic_pause_off;
+                    icon = R.drawable.sysquo_video_play;
 //                    switchCameraActionFab.hide();
                 }
                 /*localVideoActionFab.setImageDrawable(
@@ -1703,7 +1740,7 @@ public class VideoActivity extends AppCompatActivity {
             if (localAudioTrack != null) {
                 boolean enable = !localAudioTrack.isEnabled();
                 localAudioTrack.enable(enable);
-                int icon = enable ? R.drawable.sysquo_ic_mic : R.drawable.sysquo_ic_mic_off;
+                int icon = enable ? R.drawable.sysquo_mic_on : R.drawable.sysquo_mic_off;
                 Drawable top = getResources().getDrawable(icon);
                 muteActionFab.setCompoundDrawablesWithIntrinsicBounds(null, top , null, null);
 //                muteActionFab.setBackgroundDrawable(ContextCompat.getDrawable(this, icon));
@@ -1750,7 +1787,7 @@ public class VideoActivity extends AppCompatActivity {
                     }
                 }
 
-                int icon = speakerOn ? R.drawable.sysquo_ic_voice : R.drawable.sysquo_ic_speaker_off;
+                int icon = speakerOn ? R.drawable.sysquo_laudspeaker_on : R.drawable.sysquo_loudspeaker_off;
                 Drawable top = getResources().getDrawable(icon);
                 Button_VoiceLowHigh.setCompoundDrawablesWithIntrinsicBounds(null, top , null, null);
             }
@@ -1780,6 +1817,7 @@ public class VideoActivity extends AppCompatActivity {
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
     public void ExitRoom(){
+        audioSwitch.deactivate();
         ExitRoomViewModel viewModel = ViewModelProviders.of(VideoActivity.this).get(ExitRoomViewModel.class);
         viewModel.init();
         ExitRoomRequestModel exitRoomRequestModel = new ExitRoomRequestModel();
@@ -1795,6 +1833,7 @@ public class VideoActivity extends AppCompatActivity {
                 {
                     if (room != null && room.getState() != Room.State.DISCONNECTED) {
                         room.disconnect();
+                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
                     }
                     ExitRoom2();
                 }
@@ -1822,6 +1861,7 @@ public class VideoActivity extends AppCompatActivity {
                 if(response.getStatus())
                 {
 //                    room.disconnect();
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
 //                    ExitRoom2();
                 }
             }
@@ -1834,6 +1874,7 @@ public class VideoActivity extends AppCompatActivity {
 //------------------------------------------------------------------------------------------------\\
 //------------------------------------------------------------------------------------------------//
     public void LeaveEmergencyRoom(){
+        audioSwitch.deactivate();
         LeaveEmergencyCallViewModel viewModel = ViewModelProviders.of(VideoActivity.this).get(LeaveEmergencyCallViewModel.class);
         viewModel.init();
         LeaveEmergencyCallRequestModel leaveEmergencyCallRequestModel = new LeaveEmergencyCallRequestModel();
@@ -1848,6 +1889,7 @@ public class VideoActivity extends AppCompatActivity {
                     SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_EMERGENCY_CALL, false);
                     if (room != null && room.getState() != Room.State.DISCONNECTED) {
                         room.disconnect();
+                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
                     }
                 }
             }

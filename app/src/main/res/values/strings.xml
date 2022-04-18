@@ -1428,7 +1428,6 @@ We strive to provide a seamless patient experience using convenient channels for
     <string name="string_appointment_information">Appointment Information</string>
     <string name="string_download_invoice">Download Invoice</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 <!--    SYSQUO-->
     <string name="message_elipses">Write something</string>
@@ -1471,6 +1470,7 @@ We strive to provide a seamless patient experience using convenient channels for
     <string name="audio_device">Audio Device</string>
     <string name="title_activity_main_chat">General Channel</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="call">Call</string>
 
     <array
         name="symptoms">

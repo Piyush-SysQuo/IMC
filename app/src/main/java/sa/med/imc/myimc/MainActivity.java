@@ -18,6 +18,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
@@ -50,6 +51,7 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.twilio.video.Room;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -97,6 +99,8 @@ import sa.med.imc.myimc.RateTheAap.RateThisApp;
 import sa.med.imc.myimc.Records.view.RecordsFragment;
 import sa.med.imc.myimc.Records.view.ReportsListFragment;
 import sa.med.imc.myimc.RetailModule.view.RetailFacilitiesActivity;
+import sa.med.imc.myimc.SYSQUO.Chat.chat.MainChatActivity_New;
+import sa.med.imc.myimc.SYSQUO.Video.VideoActivity;
 import sa.med.imc.myimc.Settings.ContactOptionsActivity;
 import sa.med.imc.myimc.Settings.SettingActivity;
 import sa.med.imc.myimc.Telr.PaymentInfoFragment;
@@ -135,7 +139,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public static boolean active = false;
     private static final int CREATE_SLIP_FILE = 6;
     private ResponseBody responseBody;
-
+    private boolean isExitApp = false;
 
 
     Fragment homeFragment, recordsFragment, profileFragment, chatFragment,
@@ -501,6 +505,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onDestroy() {
         stopRepeatingTask();
         active = false;
+        if(isExitApp){
+            isExitApp = false;
+//            Process.killProcess(Process.myPid());
+        }
         super.onDestroy();
     }
 
@@ -1666,7 +1674,19 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                finish();
+                try {
+                    isExitApp = true;
+                    if(VideoActivity.videoActivity != null) {
+                        VideoActivity.videoActivity.finish();
+                    }
+                    if(MainChatActivity_New.mainChatActivity_new != null) {
+                        MainChatActivity_New.mainChatActivity_new.finish();
+                    }
+//                    System.exit(4);
+                    finish();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 

@@ -19,15 +19,15 @@ public class ChatClientBuilder extends CallbackListener<ChatClient> {
 
   public void build(String token, final TaskCompletionListener<ChatClient, String> listener) {
     ChatClient.Properties props =
-        new ChatClient.Properties.Builder()
-            .setRegion("us1")
-            .createProperties();
+            new ChatClient.Properties.Builder()
+                    .setRegion("us1")
+                    .createProperties();
 
     this.buildListener = listener;
     ChatClient.create(context.getApplicationContext(),
-        token,
-        props,
-        this);
+            token,
+            props,
+            this);
   }
 
 

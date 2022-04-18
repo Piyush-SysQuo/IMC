@@ -19,7 +19,8 @@
         android:background="@drawable/sysquo_round_button"
         android:layout_margin="@dimen/_10sdp"
         android:visibility="visible"
-        android:drawableTop="@drawable/sysquo_ic_video_chat" />
+        android:drawableTop="@drawable/sysquo_ic_video_chat"
+        android:drawableTint="@color/app_blue"/>
     <com.twilio.video.VideoView
         android:id="@+id/thumbnail_video_view"
         app:tviOverlaySurface="true"
@@ -34,7 +35,7 @@
         android:id="@+id/primary_video_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center" />
 
     <ProgressBar
         android:id="@+id/reconnecting_progress_bar"
@@ -79,14 +80,16 @@
         android:orientation="horizontal"
         android:weightSum="5"
         android:layout_marginBottom="-20dp">
+
         <Button
             android:id="@+id/mute_action_fab"
             android:layout_width="@dimen/_50sdp"
             android:layout_height="@dimen/_50sdp"
-            android:layout_weight="1"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:background="@drawable/sysquo_round_button"
-            android:drawableTop="@drawable/sysquo_ic_mic" />
+            android:drawableTop="@drawable/sysquo_mic_on" />
+
         <Button
             android:id="@+id/Button_VoiceLowHigh"
             android:layout_width="@dimen/_50sdp"
@@ -94,7 +97,7 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:background="@drawable/sysquo_round_button"
-            android:drawableTop="@drawable/sysquo_ic_speaker_off" />
+            android:drawableTop="@drawable/sysquo_loudspeaker_off" />
         <Button
             android:id="@+id/disconnect_action_fab"
             android:layout_width="wrap_content"
@@ -110,7 +113,7 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:background="@drawable/sysquo_round_button"
-            android:drawableTop="@drawable/sysquo_ic_pause" />
+            android:drawableTop="@drawable/sysquo_video_pause"/>
         <Button
             android:id="@+id/switch_camera_action_fab"
             android:layout_width="@dimen/_50sdp"
@@ -118,7 +121,7 @@
             android:layout_weight="1"
             android:layout_gravity="center"
             android:background="@drawable/sysquo_round_button"
-            android:drawableTop="@drawable/sysquo_ic_camera_flip" />
+            android:drawableTop="@drawable/sysquo_camera_flip" />
     </LinearLayout>
 
 
