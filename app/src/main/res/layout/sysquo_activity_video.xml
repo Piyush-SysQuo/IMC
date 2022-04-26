@@ -25,10 +25,11 @@
         android:id="@+id/thumbnail_video_view"
         app:tviOverlaySurface="true"
         app:tviMirror="true"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_width="@dimen/_96sdp"
-        android:layout_height="@dimen/_96sdp"
-        android:layout_margin="@dimen/_16sdp"
+        android:layout_height="@dimen/_120sdp"
+        android:layout_marginStart="@dimen/_16sdp"
+        android:layout_marginBottom="@dimen/_50sdp"
         android:layout_gravity="bottom|start"/>
 
     <com.twilio.video.VideoView

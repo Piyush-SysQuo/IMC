@@ -336,7 +336,7 @@ public class MainChatActivity_New extends AppCompatActivity implements ChatClien
 //        }
         if (selectedChannel != null) {
 //            showActivityIndicator("Joining " + selectedChannel.getFriendlyName() + " channel");
-            TextView_ChatUserName.setText(drName);
+//            TextView_ChatUserName.setText(drName);
 //            if (currentChannel != null && currentChannel.getStatus() == Channel.ChannelStatus.JOINED) {
 //                this.channelManager.leaveChannelWithHandler(currentChannel, new StatusListener() {
 //                    @Override

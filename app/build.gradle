@@ -75,17 +75,17 @@ android {
 
         debug {
 //            buildConfigField("String", 'BASE_URL', '"http://192.168.1.47:8080/imc_portal/"')
-            buildConfigField("String", 'BASE_URL', '"http://192.168.1.47:8080/imc-backend/"')
-            buildConfigField("String", 'BASE_URL_VIDEO', '"http://192.168.1.47:8080/imc-doctor-backend/"')
-            buildConfigField("String", 'BASE_URL_PHARMACY', '"http://192.168.1.47:8080/imc_portal_op/"')
-            buildConfigField("String", 'IMAGE_UPLOAD_URL', '"http://192.168.1.47:8080/uploads/clinic/"')
-            buildConfigField("String", 'IMAGE_UPLOAD_DOC_URL', '"http://192.168.1.47:8080/uploads/docImg/"')
-            buildConfigField("String", 'IMAGE_UPLOAD_DOC_URL_FC', '"http://192.168.1.47:8080/uploads/docImg/FC/"')
+            buildConfigField("String", 'BASE_URL', '"https://telemed.imc.med.sa/imc-backend/"')
+            buildConfigField("String", 'BASE_URL_VIDEO', '"https://telemed.imc.med.sa/imc-doctor-backend/"')
+            buildConfigField("String", 'BASE_URL_PHARMACY', '"https://telemed.imc.med.sa/imc_portal_op/"')
+            buildConfigField("String", 'IMAGE_UPLOAD_URL', '"https://telemed.imc.med.sa/uploads/clinic/"')
+            buildConfigField("String", 'IMAGE_UPLOAD_DOC_URL', '"https://telemed.imc.med.sa/uploads/docImg/"')
+            buildConfigField("String", 'IMAGE_UPLOAD_DOC_URL_FC', '"https://telemed.imc.med.sa/uploads/docImg/FC/"')
             //  buildConfigField("String", 'SYMPTOM_CHECKER_LINK', '"http://vdh.noj.mybluehost.me/symptom-checker-test/"')
             buildConfigField("String", 'SYMPTOM_CHECKER_LINK', '"https://www.imc.med.sa/symptom-checker/"')
             buildConfigField("int", 'DatabaseVersion', '5')
             buildConfigField("String", 'LICENSE_KEY', '"MEDICUS-CORE-DEMO-FREE"')
-            buildConfigField("String", 'MEDICUS_SERVER_URL', '"http://192.168.1.47:8080/imc_portal/web/medicus/"')
+            buildConfigField("String", 'MEDICUS_SERVER_URL', '"https://telemed.imc.med.sa/imc_portal/web/medicus/"')
 
             debuggable true
             // minifyEnabled false
