@@ -227,13 +227,13 @@ public class VideoActivity extends AppCompatActivity {
         if(isEmergency) {
             roomName = SessionManager.getInstance().getRoomEmergency();
             BUtton_ChatEnable.setVisibility(View.GONE);
-            mrnNumber = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(sa.med.imc.myimc.Network.Constants.KEY_USER_ID, null);
+            mrnNumber = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(Constants.KEY_MRN, null);
             physician = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_PHYSICIAN, "");
             roomName = SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_ROOMNAME, "");
         }
         else {
             BUtton_ChatEnable.setVisibility(View.VISIBLE);
-            mrnNumber = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(sa.med.imc.myimc.Network.Constants.KEY_USER_ID, null);
+            mrnNumber = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(Constants.KEY_MRN, null);
             physician = SharedPreferencesUtils.getInstance(VideoActivity.this).getValue(Constants.KEY_VIDEO_PHYSICIAN, null);;
             roomName = mrnNumber+"_"+physician;
         }
@@ -794,8 +794,9 @@ public class VideoActivity extends AppCompatActivity {
                 if(!homeButtonPressed) {
                     try {
                         Intent in = new Intent(VideoActivity.this, MainChatActivity_New.class);
-                        in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                        in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        in.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+//                        in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                        in.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                         startActivity(in);
                     }catch (Exception e){
                         e.printStackTrace();

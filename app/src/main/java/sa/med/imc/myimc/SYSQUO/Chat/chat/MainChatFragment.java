@@ -1,7 +1,10 @@
 package sa.med.imc.myimc.SYSQUO.Chat.chat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.Ringtone;
@@ -10,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +22,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.mindorks.editdrawabletext.DrawablePosition;
+import com.mindorks.editdrawabletext.EditDrawableText;
+import com.mindorks.editdrawabletext.onDrawableClickListener;
 import com.twilio.chat.CallbackListener;
 import com.twilio.chat.Channel;
 import com.twilio.chat.ChannelListener;
@@ -30,10 +40,18 @@ import com.twilio.chat.Message;
 import com.twilio.chat.Messages;
 import com.twilio.chat.StatusListener;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 import sa.med.imc.myimc.Network.Constants;
+import sa.med.imc.myimc.Network.ImcApplication;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
 import sa.med.imc.myimc.R;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.JoinedStatusMessage;
@@ -42,18 +60,22 @@ import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.MessageAdapter;
 import sa.med.imc.myimc.SYSQUO.Chat.chat.messages.StatusMessage;
 import sa.med.imc.myimc.SYSQUO.util.Progress;
 import sa.med.imc.myimc.Utils.Common;
+import sa.med.imc.myimc.Utils.FileUtils;
 
-public class MainChatFragment extends Fragment implements ChannelListener {
+import static android.app.Activity.RESULT_OK;
+
+public class MainChatFragment extends Fragment implements ChannelListener, AttachmentSelectionInterface {
   Context context;
   Activity mainActivity;
   Button sendButton;
   ListView messagesListView;
-  EditText messageTextEdit;
-
+  EditDrawableText messageTextEdit;
   MessageAdapter messageAdapter;
   Channel currentChannel;
   Messages messagesObject;
+  AttachmentSelectionInterface attachmentSelectionInterface;
 
+  private static final int REQUEST_CODE = 6384; // onActivityResult request
   Progress progress;
   public MainChatFragment() {
   }
@@ -82,30 +104,42 @@ public class MainChatFragment extends Fragment implements ChannelListener {
 
     sendButton = (Button) view.findViewById(R.id.buttonSend);
     messagesListView = (ListView) view.findViewById(R.id.listViewMessages);
-    messageTextEdit = (EditText) view.findViewById(R.id.editTextMessage);
+    messageTextEdit = (EditDrawableText) view.findViewById(R.id.editTextMessage);
 
-    messageAdapter = new MessageAdapter(mainActivity);
+    messageAdapter = new MessageAdapter(mainActivity, attachmentSelectionInterface);
     messagesListView.setAdapter(messageAdapter);
     setUpListeners();
     setMessageInputEnabled(false);
-
+    messageTextEdit.setDrawableClickListener(new onDrawableClickListener() {
+      @Override
+      public void onClick(@NotNull DrawablePosition drawablePosition) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/pdf");
+        startActivityForResult(intent, REQUEST_CODE);
+      }
+    });
     return view;
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onDetach() {
     super.onDetach();
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   public Channel getCurrentChannel() {
     return currentChannel;
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   public void setCurrentChannel(Channel currentChannel, final StatusListener handler) {
     showActivityIndicator("");
     if (currentChannel == null) {
@@ -149,7 +183,8 @@ public class MainChatFragment extends Fragment implements ChannelListener {
       }
     }
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void loadMessages(final StatusListener handler) {
     messagesObject = currentChannel.getMessages();
 
@@ -168,7 +203,8 @@ public class MainChatFragment extends Fragment implements ChannelListener {
 //      Common.makeToast(getActivity(), "Message Object is null ");
     }
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void setUpListeners() {
     sendButton.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -183,7 +219,8 @@ public class MainChatFragment extends Fragment implements ChannelListener {
       }
     });
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void sendMessage() {
     String messageText = getTextInput();
     if (messageText.length() == 0) {
@@ -193,7 +230,8 @@ public class MainChatFragment extends Fragment implements ChannelListener {
     this.messagesObject.sendMessage(messageOptions, null);
     clearTextInput();
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void setMessageInputEnabled(final boolean enabled) {
     mainActivity.runOnUiThread(new Runnable() {
       @Override
@@ -203,56 +241,68 @@ public class MainChatFragment extends Fragment implements ChannelListener {
       }
     });
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private String getTextInput() {
     return messageTextEdit.getText().toString();
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void clearTextInput() {
     messageTextEdit.setText("");
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMessageAdded(Message message) {
     messageAdapter.addMessage(message);
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMemberAdded(Member member) {
     StatusMessage statusMessage = new JoinedStatusMessage(member.getIdentity());
     this.messageAdapter.addStatusMessage(statusMessage);
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMemberDeleted(Member member) {
     StatusMessage statusMessage = new LeftStatusMessage(member.getIdentity());
     this.messageAdapter.addStatusMessage(statusMessage);
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMessageUpdated(Message message, Message.UpdateReason updateReason) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMessageDeleted(Message message) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onMemberUpdated(Member member, Member.UpdateReason updateReason) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onTypingStarted(Channel channel, Member member) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onTypingEnded(Channel channel, Member member) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   @Override
   public void onSynchronizationChanged(Channel channel) {
   }
-
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   public void stopActivityIndicator() {
     getActivity().runOnUiThread(new Runnable() {
       @Override
@@ -266,6 +316,8 @@ public class MainChatFragment extends Fragment implements ChannelListener {
       }
     });
   }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
   private void showActivityIndicator(final String message) {
     getActivity().runOnUiThread(new Runnable() {
       @Override
@@ -279,4 +331,64 @@ public class MainChatFragment extends Fragment implements ChannelListener {
       }
     });
   }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    if (resultCode == getActivity().RESULT_OK) {
+      if (data != null) {
+        // Get the URI of the selected file
+        final Uri uri = data.getData();
+        Log.i(ImcApplication.TAG, "Uri = " + uri.toString());
+        try {
+          // Get the file path from the URI
+          final String path = FileUtils.getPath(getContext(), uri);
+          if(path.contains(".jpeg") || path.contains(".jpg") || path.contains(".png") || path.contains(".gif") || path.contains(".txt") || path.contains(".pdf")) {
+            readFileData(path);
+          }else {
+            Common.makeToast(getActivity(), getResources().getString(R.string.fileSelectionError));
+//                getActivity().finish();
+          }
+        } catch (Exception e) {
+          Log.e("jjjjjjjjj", "File select error", e);
+        }
+      }
+    }
+  }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
+  public void readFileData(String path) throws FileNotFoundException
+  {
+
+    String[] data;
+    File file = new File(path);
+    if (file.exists())
+    {
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      Common.makeToast(getActivity(), file.getName());
+    }
+    else
+    {
+      Common.makeToast(getActivity(), getResources().getString(R.string.fileNotExists));
+    }
+  }
+
+  @Override
+  public void getAttachMediaType(String mediaType) {
+
+  }
+
+  @Override
+  public void downloadPdf(String fileName, String fileUrl, String mimeType, View view) {
+
+  }
+
+
+
+  @Override
+  public void enlargeImage(String fileName, String fileUrl, View view) {
+
+  }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
 }

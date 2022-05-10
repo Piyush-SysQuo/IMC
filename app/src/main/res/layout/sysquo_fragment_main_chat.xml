@@ -28,7 +28,7 @@
         android:paddingLeft="@dimen/_5sdp">
 
 
-        <EditText
+        <com.mindorks.editdrawabletext.EditDrawableText
             android:id="@+id/editTextMessage"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
@@ -46,7 +46,8 @@
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_size_normal"
             android:inputType="textCapSentences"
-            android:imeOptions="actionSend"/>
+            android:imeOptions="actionSend"
+            android:drawableRight="@drawable/sysquo_attach_file"/>
 
         <Button
             android:id="@+id/buttonSend"

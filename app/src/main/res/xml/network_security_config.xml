@@ -3,6 +3,8 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.1.49</domain>
         <domain includeSubdomains="true">192.168.1.47</domain>
+        <domain includeSubdomains="true">telemed.imc.med.sa</domain>
+        <domain includeSubdomains="true">media.us1.twilio.com</domain>
         <domain includeSubdomains="true">www.imc.med.sa</domain>
         <domain includeSubdomains="true">www.assessmentcenter.net</domain>
         <domain includeSubdomains="true">patientportal.imc.med.sa</domain>

@@ -1,20 +1,4 @@
-/*
- * Copyright (C) 2007-2008 OpenIntents.org
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package sa.med.imc.myimc.Utils;
+package sa.med.imc.myimc.SYSQUO.util;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -28,28 +12,26 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-
 
 import java.io.File;
 import java.io.FileFilter;
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.List;
 
-/**
- * @version 2009-07-03
- * @author Peli
- * @version 2013-12-11
- * @author paulburke (ipaulpro)
- */
-public class FileUtils {
-    private FileUtils() {} //private constructor to enforce Singleton pattern
-    
-    /** TAG for log messages. */
+import sa.med.imc.myimc.Utils.LocalStorageProvider;
+
+public class FileUtilsSysQuo {
+    private FileUtilsSysQuo() {
+    } //private constructor to enforce Singleton pattern
+
+    /**
+     * TAG for log messages.
+     */
     static final String TAG = "FileUtils";
-    private static final boolean DEBUG = false; // Set to true to enable logging
+    private static final boolean DEBUG = true; // Set to true to enable logging
 
     public static final String MIME_TYPE_AUDIO = "audio/*";
     public static final String MIME_TYPE_TEXT = "text/*";
@@ -64,7 +46,7 @@ public class FileUtils {
      *
      * @param uri
      * @return Extension including the dot("."); "" if there is no extension;
-     *         null if uri was null.
+     * null if uri was null.
      */
     public static String getExtension(String uri) {
         if (uri == null) {
@@ -207,15 +189,15 @@ public class FileUtils {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @param selection (Optional) Filter used in the query.
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      * @author paulburke
      */
     public static String getDataColumn(Context context, Uri uri, String selection,
-            String[] selectionArgs) {
+                                       String[] selectionArgs) {
 
         Cursor cursor = null;
         final String column = "_data";
@@ -233,7 +215,9 @@ public class FileUtils {
                 final int column_index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(column_index);
             }
-        } finally {
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
             if (cursor != null)
                 cursor.close();
         }
@@ -241,18 +225,18 @@ public class FileUtils {
     }
 
     /**
-     * Get a file path from a Uri. This will get the the path for Storage Access
+     * Get a file path from a Uri. This will quickGet the the path for Storage Access
      * Framework Documents, as well as the _data field for the MediaStore and
      * other file-based ContentProviders.<br>
      * <br>
      * Callers should check whether the path is local before assuming it
      * represents a local file.
-     * 
+     *
      * @param context The context.
-     * @param uri The Uri to query.
+     * @param uri     The Uri to query.
+     * @author paulburke
      * @see #isLocal(String)
      * @see #getFile(Context, Uri)
-     * @author paulburke
      */
     public static String getPath(final Context context, final Uri uri) {
 
@@ -265,12 +249,9 @@ public class FileUtils {
                             ", Scheme: " + uri.getScheme() +
                             ", Host: " + uri.getHost() +
                             ", Segments: " + uri.getPathSegments().toString()
-                    );
-
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
+            );
         // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
             // LocalStorageProvider
             if (isLocalStorageDocument(uri)) {
                 // The path is the id
@@ -282,44 +263,32 @@ public class FileUtils {
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
-                if ("primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
-                }
+//                if ("primary".equalsIgnoreCase(type)) {
+//                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+//                }
+                return Environment.getExternalStorageDirectory() + "/" + split[1];
 
                 // TODO handle non-primary volumes
             }
             // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
-
-                final String id = DocumentsContract.getDocumentId(uri);
-//                final Uri contentUri = ContentUris.withAppendedId(
-//                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-
-                String[] contentUriPrefixesToTry = new String[]{
-                        "content://downloads/public_downloads",
-                        "content://downloads/my_downloads"
-                };
-
-                for (String contentUriPrefix : contentUriPrefixesToTry) {
-                    if (!TextUtils.isEmpty(id)) {
-                        if (id.startsWith("raw:")) {
-                            id.replaceFirst("raw:", "");
+                try {
+                    final String id = DocumentsContract.getDocumentId(uri);
+                    Log.d(TAG, "getPath: id= " + id);
+                    final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                    return getDataColumn(context, contentUri, null, null);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    List<String> segments = uri.getPathSegments();
+                    if(segments.size() > 1) {
+                        String rawPath = segments.get(1);
+                        if(!rawPath.startsWith("/")){
+                            return rawPath.substring(rawPath.indexOf("/"));
+                        }else {
+                            return rawPath;
                         }
-
-                    }
-//                    Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.parseLong(id));
-                    Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                    try {
-                        String path = getDataColumn(context, contentUri, null, null);
-                        if (path != null) {
-                            return path;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
-
             }
             // MediaProvider
             else if (isMediaDocument(uri)) {
@@ -337,7 +306,7 @@ public class FileUtils {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
+                final String[] selectionArgs = new String[]{
                         split[1]
                 };
 
@@ -361,97 +330,13 @@ public class FileUtils {
         return null;
     }
 
-    public static String getPath2(final Context context, final Uri uri) {
-        try {
-            if (DEBUG)
-                Log.d(TAG + " File -",
-                        "Authority: " + uri.getAuthority() +
-                                ", Fragment: " + uri.getFragment() +
-                                ", Port: " + uri.getPort() +
-                                ", Query: " + uri.getQuery() +
-                                ", Scheme: " + uri.getScheme() +
-                                ", Host: " + uri.getHost() +
-                                ", Segments: " + uri.getPathSegments().toString()
-                );
-
-            final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
-            // DocumentProvider
-            if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
-                // LocalStorageProvider
-                if (isLocalStorageDocument(uri)) {
-                    // The path is the id
-                    return DocumentsContract.getDocumentId(uri);
-                }
-                // ExternalStorageProvider
-                else if (isExternalStorageDocument(uri)) {
-                    final String docId = DocumentsContract.getDocumentId(uri);
-                    final String[] split = docId.split(":");
-                    final String type = split[0];
-
-                    if ("primary".equalsIgnoreCase(type)) {
-                        return Environment.getExternalStorageDirectory() + "/" + split[1];
-                    }
-
-                    // TODO handle non-primary volumes
-                }
-                // DownloadsProvider
-                else if (isDownloadsDocument(uri)) {
-
-                    final String id = DocumentsContract.getDocumentId(uri);
-                    final Uri contentUri = ContentUris.withAppendedId(
-                            Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                    return getDataColumn(context, contentUri, null, null);
-                }
-                // MediaProvider
-                else if (isMediaDocument(uri)) {
-                    final String docId = DocumentsContract.getDocumentId(uri);
-                    final String[] split = docId.split(":");
-                    final String type = split[0];
-
-                    Uri contentUri = null;
-                    if ("image".equals(type)) {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    } else if ("video".equals(type)) {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    } else if ("audio".equals(type)) {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                    }
-
-                    final String selection = "_id=?";
-                    final String[] selectionArgs = new String[]{
-                            split[1]
-                    };
-
-                    return getDataColumn(context, contentUri, selection, selectionArgs);
-                }
-            }
-            // MediaStore (and general)
-            else if ("content".equalsIgnoreCase(uri.getScheme())) {
-
-                // Return the remote address
-                if (isGooglePhotosUri(uri))
-                    return uri.getLastPathSegment();
-
-                return getDataColumn(context, uri, null, null);
-            }
-            // File
-            else if ("file".equalsIgnoreCase(uri.getScheme())) {
-                return uri.getPath();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
     /**
      * Convert Uri into File, if possible.
      *
      * @return file A local file that the Uri was pointing to, or null if the
-     *         Uri is unsupported or pointed to a remote resource.
-     * @see #getPath(Context, Uri)
+     * Uri is unsupported or pointed to a remote resource.
      * @author paulburke
+     * @see #getPath(Context, Uri)
      */
     public static File getFile(Context context, Uri uri) {
         if (uri != null) {
@@ -532,7 +417,7 @@ public class FileUtils {
      */
     public static Bitmap getThumbnail(Context context, Uri uri, String mimeType) {
         if (DEBUG)
-            Log.d(TAG, "Attempting to get thumbnail");
+            Log.d(TAG, "Attempting to quickGet thumbnail");
 
         if (!isMediaUri(uri)) {
             Log.e(TAG, "You can only retrieve thumbnails for images and videos.");
@@ -556,8 +441,7 @@ public class FileUtils {
                                 id,
                                 MediaStore.Video.Thumbnails.MINI_KIND,
                                 null);
-                    }
-                    else if (mimeType.contains(FileUtils.MIME_TYPE_IMAGE)) {
+                    } else if (mimeType.contains(FileUtilsSysQuo.MIME_TYPE_IMAGE)) {
                         bm = MediaStore.Images.Thumbnails.getThumbnail(
                                 resolver,
                                 id,

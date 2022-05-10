@@ -3,15 +3,31 @@ package sa.med.imc.myimc.SYSQUO.Chat.chat.messages;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.squareup.picasso.Picasso;
 import com.twilio.chat.Message;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
@@ -19,6 +35,8 @@ import java.util.TreeSet;
 import sa.med.imc.myimc.Managebookings.view.ManageBookingsActivity;
 import sa.med.imc.myimc.Network.SharedPreferencesUtils;
 import sa.med.imc.myimc.R;
+import sa.med.imc.myimc.SYSQUO.Chat.chat.AttachmentSelectionInterface;
+import sa.med.imc.myimc.SYSQUO.Chat.chat.ImageLoader.ImageLoader;
 import sa.med.imc.myimc.SYSQUO.Video.VideoActivity;
 import sa.med.imc.myimc.SYSQUO.util.Constants;
 
@@ -31,10 +49,11 @@ public class MessageAdapter extends BaseAdapter {
   private LayoutInflater layoutInflater;
   private TreeSet<Integer> statusMessageSet = new TreeSet<>();
   Context mContext;
-
-  public MessageAdapter(Activity activity) {
+  AttachmentSelectionInterface attachmentSelectionInterface;
+  public MessageAdapter(Activity activity, AttachmentSelectionInterface attachmentSelectionInterface) {
     layoutInflater = activity.getLayoutInflater();
     this.mContext = activity;
+    this.attachmentSelectionInterface = attachmentSelectionInterface;
     messages = new ArrayList<>();
   }
 
@@ -105,31 +124,469 @@ public class MessageAdapter extends BaseAdapter {
       switch (type) {
         case TYPE_MESSAGE:
           ChatMessage message = messages.get(position);
-//          PIYUSH 28-0-2022
-          String identity = SharedPreferencesUtils.getInstance(mContext).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
-          if(!message.getAuthor().equals(identity))
+//          MEDIA MESSAGE
+          if(message.hasMedia())
           {
-            res = R.layout.sysquo_message_send;
-            convertView = layoutInflater.inflate(res, viewGroup, false);
-            LinearLayout LayoutMain = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
-            TextView textViewMessage = (TextView) convertView.findViewById(R.id.textViewMessage);
-            TextView textViewAuthor = (TextView) convertView.findViewById(R.id.textViewAuthor);
-            TextView textViewDate = (TextView) convertView.findViewById(R.id.textViewDate);
-            textViewMessage.setText(message.getMessageBody());
-            textViewAuthor.setText(message.getAuthor());
-            textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated()));
+            String identity = SharedPreferencesUtils.getInstance(mContext).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
+            if (!message.getAuthor().equals(identity))
+            {
+              res = R.layout.sysquo_message_send;
+              convertView = layoutInflater.inflate(res, viewGroup, false);
+              ImageLoader imgLoader = new ImageLoader(mContext);
+              int loader = R.drawable.sysquo_loader;
+              LinearLayout LayoutMain             = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
+
+              LinearLayout LinearLayoutMessage    = (LinearLayout) convertView.findViewById(R.id.LinearLayoutMessage);
+              TextView TextViewMessage            = (TextView) convertView.findViewById(R.id.TextViewMessage);
+
+              LinearLayout LinearLayoutImage      = (LinearLayout)convertView.findViewById(R.id.LinearLayoutImage);
+              ImageView ImageView_Icon_Image      = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Image);
+              TextView TextView_Image_Name        = (TextView) convertView.findViewById(R.id.TextView_Image_Name);
+              ImageView ImagevIew_Download_Image  = (ImageView) convertView.findViewById(R.id.ImagevIew_Download_Image);
+
+              LinearLayout LinearLayoutPdf        = (LinearLayout)convertView.findViewById(R.id.LinearLayoutPdf);
+              ImageView ImageView_Icon_Pdf        = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Pdf);
+              TextView TextView_Pdf_Name          = (TextView) convertView.findViewById(R.id.TextView_Pdf_Name);
+              ImageView ImageView_Download_PDF    = (ImageView) convertView.findViewById(R.id.ImageView_Download_PDF);
+
+              TextView textViewAuthor             = (TextView) convertView.findViewById(R.id.textViewAuthor);
+              TextView textViewDate               = (TextView) convertView.findViewById(R.id.textViewDate);
+
+              if(message.getMediaType().getValue() == 1)
+              {
+                if(message.getFileName() != null)
+                {
+                  String imgUrl = message.getContentTemporaryUrl();
+                  if (message.getFileName().contains(".pdf") || message.getFileName().contains(".PDF") || message.getFileName().contains(".Pdf"))
+                  {
+                    LinearLayoutMessage.setVisibility(View.GONE);
+                    LinearLayoutImage.setVisibility(View.GONE);
+                    LinearLayoutPdf.setVisibility(View.VISIBLE);
+
+                    TextView_Pdf_Name.setText(message.getFileName());
+
+                    LinearLayoutPdf.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    ImageView_Icon_Pdf.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    TextView_Pdf_Name.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    ImageView_Download_PDF.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    LayoutMain.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    textViewDate.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+                  }
+                  else if(message.getFileName().contains(".gif") || message.getFileName().contains(".jpeg") || message.getFileName().contains(".jpg") || message.getFileName().contains(".png"))
+                  {
+                    LinearLayoutMessage.setVisibility(View.GONE);
+                    LinearLayoutImage.setVisibility(View.VISIBLE);
+                    LinearLayoutPdf.setVisibility(View.GONE);
+
+                    TextView_Image_Name.setText(message.getFileName());
+
+                    LayoutMain.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    LinearLayoutImage.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    ImageView_Icon_Image.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    TextView_Image_Name.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    ImagevIew_Download_Image.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    textViewDate.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+                  }
+                }
+                else
+                {
+                  LinearLayoutMessage.setVisibility(View.GONE);
+                  LinearLayoutImage.setVisibility(View.GONE);
+                  LinearLayoutPdf.setVisibility(View.VISIBLE);
+                  ImageView_Download_PDF.setVisibility(View.GONE);
+                  Drawable drawable = mContext.getResources().getDrawable(R.drawable.ic_error_red);
+                  ImageView_Icon_Pdf.setImageDrawable(drawable);
+                  TextView_Pdf_Name.setText("unknown Media");
+                }
+              }
+
+              textViewAuthor.setText(message.getAuthor().trim());
+              textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated().trim()));
+            }
+            else
+            {
+              res = R.layout.sysquo_message;
+              convertView = layoutInflater.inflate(res, viewGroup, false);
+              ImageLoader imgLoader = new ImageLoader(mContext);
+              int loader = R.drawable.sysquo_loader;
+              LinearLayout LayoutMain       = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
+
+              LinearLayout LinearLayoutMessage    = (LinearLayout) convertView.findViewById(R.id.LinearLayoutMessage);
+              TextView TextViewMessage            = (TextView) convertView.findViewById(R.id.TextViewMessage);
+
+              LinearLayout LinearLayoutImage      = (LinearLayout)convertView.findViewById(R.id.LinearLayoutImage);
+              ImageView ImageView_Icon_Image      = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Image);
+              TextView TextView_Image_Name        = (TextView) convertView.findViewById(R.id.TextView_Image_Name);
+              ImageView ImagevIew_Download_Image  = (ImageView) convertView.findViewById(R.id.ImagevIew_Download_Image);
+
+              LinearLayout LinearLayoutPdf        = (LinearLayout)convertView.findViewById(R.id.LinearLayoutPdf);
+              ImageView ImageView_Icon_Pdf        = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Pdf);
+              TextView TextView_Pdf_Name          = (TextView) convertView.findViewById(R.id.TextView_Pdf_Name);
+              ImageView ImageView_Download_PDF    = (ImageView) convertView.findViewById(R.id.ImageView_Download_PDF);
+
+              TextView textViewAuthor             = (TextView) convertView.findViewById(R.id.textViewAuthor);
+              TextView textViewDate               = (TextView) convertView.findViewById(R.id.textViewDate);
+              if(message.getMediaType().getValue() == 1)
+              {
+                if(message.getFileName() != null)
+                {
+                  String imgUrl = message.getContentTemporaryUrl();
+                  if (message.getFileName().contains(".pdf") || message.getFileName().contains(".Pdf") || message.getFileName().contains(".PDF"))
+                  {
+                    LinearLayoutMessage.setVisibility(View.GONE);
+                    LinearLayoutImage.setVisibility(View.GONE);
+                    LinearLayoutPdf.setVisibility(View.VISIBLE);
+
+                    TextView_Pdf_Name.setText(message.getFileName());
+
+                    LinearLayoutPdf.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    ImageView_Icon_Pdf.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    TextView_Pdf_Name.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    ImageView_Download_PDF.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    LayoutMain.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+
+                    textViewDate.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "application/pdf", v);
+                      }
+                    });
+                  }
+                  else if(message.getFileName().contains(".gif") || message.getFileName().contains(".jpeg") || message.getFileName().contains(".jpg") || message.getFileName().contains(".png"))
+                  {
+                    LinearLayoutMessage.setVisibility(View.GONE);
+                    LinearLayoutImage.setVisibility(View.VISIBLE);
+                    LinearLayoutPdf.setVisibility(View.GONE);
+
+                    TextView_Image_Name.setText(message.getFileName());
+
+                    LayoutMain.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    LinearLayoutImage.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    ImageView_Icon_Image.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    TextView_Image_Name.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    ImagevIew_Download_Image.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+
+                    textViewDate.setOnClickListener(new View.OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (message.getFileName() != null)
+                        {
+                          attachmentSelectionInterface.downloadPdf(message.getFileName(), message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage(message.getFileName(), message.getContentTemporaryUrl(), v);
+                        }
+                        else
+                        {
+                          attachmentSelectionInterface.downloadPdf("unknown.jpg", message.getContentTemporaryUrl(), "image/*", v);
+                          attachmentSelectionInterface.enlargeImage("unknown.jpg", message.getContentTemporaryUrl(), v);
+                        }
+                      }
+                    });
+                  }
+                }
+                else
+                {
+                  LinearLayoutMessage.setVisibility(View.GONE);
+                  LinearLayoutImage.setVisibility(View.GONE);
+                  LinearLayoutPdf.setVisibility(View.VISIBLE);
+                  ImageView_Download_PDF.setVisibility(View.GONE);
+                  Drawable drawable = mContext.getResources().getDrawable(R.drawable.ic_error_red);
+                  ImageView_Icon_Pdf.setImageDrawable(drawable);
+                  TextView_Pdf_Name.setText("unknown Media");
+                }
+              }
+
+              textViewAuthor.setText(message.getAuthor().trim());
+              textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated().trim()));
+            }
           }
-          else
-          {
-            res = R.layout.sysquo_message;
-            convertView = layoutInflater.inflate(res, viewGroup, false);
-            LinearLayout LayoutMain = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
-            TextView textViewMessage = (TextView) convertView.findViewById(R.id.textViewMessage);
-            TextView textViewAuthor = (TextView) convertView.findViewById(R.id.textViewAuthor);
-            TextView textViewDate = (TextView) convertView.findViewById(R.id.textViewDate);
-            textViewMessage.setText(message.getMessageBody().trim());
-            textViewAuthor.setText(message.getAuthor().trim());
-            textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated().trim()));
+          else {
+//          PIYUSH 28-0-2022
+            String identity = SharedPreferencesUtils.getInstance(mContext).getValue(sa.med.imc.myimc.Network.Constants.KEY_VIDEO_PHYSICIAN, null);
+            if (!message.getAuthor().equals(identity)) {
+              res = R.layout.sysquo_message_send;
+              convertView = layoutInflater.inflate(res, viewGroup, false);
+              LinearLayout LayoutMain = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
+
+              LinearLayout LinearLayoutMessage    = (LinearLayout) convertView.findViewById(R.id.LinearLayoutMessage);
+              TextView TextViewMessage            = (TextView) convertView.findViewById(R.id.TextViewMessage);
+
+              LinearLayout LinearLayoutImage      = (LinearLayout)convertView.findViewById(R.id.LinearLayoutImage);
+              ImageView ImageView_Icon_Image      = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Image);
+              TextView TextView_Image_Name        = (TextView) convertView.findViewById(R.id.TextView_Image_Name);
+              ImageView ImagevIew_Download_Image  = (ImageView) convertView.findViewById(R.id.ImagevIew_Download_Image);
+
+              LinearLayout LinearLayoutPdf        = (LinearLayout)convertView.findViewById(R.id.LinearLayoutPdf);
+              ImageView ImageView_Icon_Pdf        = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Pdf);
+              TextView TextView_Pdf_Name          = (TextView) convertView.findViewById(R.id.TextView_Pdf_Name);
+              ImageView ImageView_Download_PDF    = (ImageView) convertView.findViewById(R.id.ImageView_Download_PDF);
+
+              TextView textViewAuthor             = (TextView) convertView.findViewById(R.id.textViewAuthor);
+              TextView textViewDate               = (TextView) convertView.findViewById(R.id.textViewDate);
+
+              LinearLayoutMessage.setVisibility(View.VISIBLE);
+              LinearLayoutPdf.setVisibility(View.GONE);
+              LinearLayoutImage.setVisibility(View.GONE);
+
+              TextViewMessage.setText(message.getMessageBody().trim());
+              textViewAuthor.setText(message.getAuthor());
+              textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated()));
+            }
+            else {
+              res = R.layout.sysquo_message;
+              convertView = layoutInflater.inflate(res, viewGroup, false);
+              LinearLayout LayoutMain = (LinearLayout) convertView.findViewById(R.id.LayoutMain);
+
+              LinearLayout LinearLayoutMessage    = (LinearLayout) convertView.findViewById(R.id.LinearLayoutMessage);
+              TextView TextViewMessage            = (TextView) convertView.findViewById(R.id.TextViewMessage);
+
+              LinearLayout LinearLayoutImage      = (LinearLayout)convertView.findViewById(R.id.LinearLayoutImage);
+              ImageView ImageView_Icon_Image      = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Image);
+              TextView TextView_Image_Name        = (TextView) convertView.findViewById(R.id.TextView_Image_Name);
+              ImageView ImagevIew_Download_Image  = (ImageView) convertView.findViewById(R.id.ImagevIew_Download_Image);
+
+              LinearLayout LinearLayoutPdf        = (LinearLayout)convertView.findViewById(R.id.LinearLayoutPdf);
+              ImageView ImageView_Icon_Pdf        = (ImageView) convertView.findViewById(R.id.ImageView_Icon_Pdf);
+              TextView TextView_Pdf_Name          = (TextView) convertView.findViewById(R.id.TextView_Pdf_Name);
+              ImageView ImageView_Download_PDF    = (ImageView) convertView.findViewById(R.id.ImageView_Download_PDF);
+
+              TextView textViewAuthor             = (TextView) convertView.findViewById(R.id.textViewAuthor);
+              TextView textViewDate               = (TextView) convertView.findViewById(R.id.textViewDate);
+
+              LinearLayoutMessage.setVisibility(View.VISIBLE);
+              LinearLayoutPdf.setVisibility(View.GONE);
+              LinearLayoutImage.setVisibility(View.GONE);
+
+              TextViewMessage.setText(message.getMessageBody().trim());
+              textViewAuthor.setText(message.getAuthor());
+              textViewDate.setText(DateFormatter.getFormattedDateFromISOString(message.getDateCreated()));
+            }
           }
           break;
         case TYPE_STATUS:
@@ -191,4 +648,35 @@ public class MessageAdapter extends BaseAdapter {
 
     return convertView;
   }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+      ImageView bmImage;
+      ProgressBar progressBar;
+      public DownloadImageTask(ImageView bmImage, ProgressBar progressBar) {
+        this.bmImage = bmImage;
+        this.progressBar = progressBar;
+      }
+
+      protected Bitmap doInBackground(String... urls) {
+        String urldisplay = urls[0];
+        Bitmap mIcon11 = null;
+        try {
+          InputStream in = new java.net.URL(urldisplay).openStream();
+          mIcon11 = BitmapFactory.decodeStream(in);
+        } catch (Exception e) {
+          Log.e("Error", e.getMessage());
+          e.printStackTrace();
+        }
+        return mIcon11;
+      }
+
+      protected void onPostExecute(Bitmap result) {
+        bmImage.setImageBitmap(result);
+        progressBar.setVisibility(View.GONE);
+      }
+    }
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
+//------------------------------------------------------------------------------------------------\\
+//------------------------------------------------------------------------------------------------//
 }
