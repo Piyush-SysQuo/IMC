@@ -557,6 +557,18 @@ public class UpcomingBookingFragment extends Fragment implements CheckInViews, B
                     startActivity(i);*/
     //                Intent in = new Intent(getActivity(), SelectionActivity.class);
     //                startActivity(in);
+                String DrName = null;
+                if (upcomingList.get(position).getGivenName() != null) {
+//                    if (booking.getFamilyName() != null) {
+//                        DrName =  "DR. " + booking.getGivenName() + " " + booking.getFamilyName();
+//                    }
+//                    else {
+//                        DrName= "DR. " + booking.getGivenName();
+//                    }
+                    DrName = getResources().getString(R.string.dr) + " " + upcomingList.get(position).getGivenName()+" - "+upcomingList.get(position).getClinicDescEn();
+                }
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, upcomingList.get(position).getDocCode());
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, DrName);
                 clickToStartVideoCall(bookingId, bookingDateTime);
             }
         });

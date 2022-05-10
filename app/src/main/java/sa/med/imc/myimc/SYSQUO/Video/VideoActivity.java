@@ -104,6 +104,7 @@ import sa.med.imc.myimc.SYSQUO.Video.JoningRequest.ConferenceJoiningReqViewModel
 import sa.med.imc.myimc.SYSQUO.Video.JoningRequest.ConferenceJoiningRequestMode;
 import sa.med.imc.myimc.SYSQUO.util.CameraCapturerCompat;
 import sa.med.imc.myimc.SYSQUO.util.Dialog;
+import sa.med.imc.myimc.SplashActivity;
 import tvi.webrtc.VideoSink;
 
 public class VideoActivity extends AppCompatActivity {
@@ -305,7 +306,7 @@ public class VideoActivity extends AppCompatActivity {
         }
         else {
             room.disconnect();
-            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
             if (SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)) {
                 LeaveEmergencyRoom();
             } else {
@@ -315,14 +316,17 @@ public class VideoActivity extends AppCompatActivity {
 //        PIYUSH-24-03-22
 
             if (SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("1")) {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
             } else if (SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("2")) {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, MainActivity.class);
                 startActivity(in);
                 finish();
             } else if (SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("3")) {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
@@ -539,7 +543,7 @@ public class VideoActivity extends AppCompatActivity {
          */
         if (room != null && room.getState() != Room.State.DISCONNECTED) {
             room.disconnect();
-            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+            SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
 
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                 LeaveEmergencyRoom();
@@ -808,6 +812,7 @@ public class VideoActivity extends AppCompatActivity {
             }
             else
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, MainActivity.class);
                 startActivity(in);
             }
@@ -818,7 +823,7 @@ public class VideoActivity extends AppCompatActivity {
             if (onStopCalled) {
                 if (room != null && room.getState() != Room.State.DISCONNECTED) {
                     room.disconnect();
-                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
                 }
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
@@ -828,18 +833,21 @@ public class VideoActivity extends AppCompatActivity {
                 }
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("1"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, ManageBookingsActivity.class);
                     startActivity(in);
                     finish();
                 }
                 else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("2"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, MainActivity.class);
                     startActivity(in);
                     finish();
                 }
                 else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("3"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, ManageBookingsActivity.class);
                     startActivity(in);
                     finish();
@@ -1161,7 +1169,7 @@ public class VideoActivity extends AppCompatActivity {
                             == CameraCapturerCompat.Source.FRONT_CAMERA);
             if (room != null && room.getState() != Room.State.DISCONNECTED) {
                 room.disconnect();
-                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
             }
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
              LeaveEmergencyRoom();
@@ -1173,18 +1181,21 @@ public class VideoActivity extends AppCompatActivity {
             audioSwitch.deactivate();
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("1"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
             }
             else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("2"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, MainActivity.class);
                 startActivity(in);
                 finish();
             }
             else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("3"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
@@ -1204,7 +1215,7 @@ public class VideoActivity extends AppCompatActivity {
                                 == CameraCapturerCompat.Source.FRONT_CAMERA);
                 if (room != null && room.getState() != Room.State.DISCONNECTED) {
                     room.disconnect();
-                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
                 }
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
@@ -1216,18 +1227,21 @@ public class VideoActivity extends AppCompatActivity {
                 audioSwitch.deactivate();
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("1"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, ManageBookingsActivity.class);
                     startActivity(in);
                     finish();
                 }
                 else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("2"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, MainActivity.class);
                     startActivity(in);
                     finish();
                 }
                 else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("3"))
                 {
+                    SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                     Intent in = new Intent(this, ManageBookingsActivity.class);
                     startActivity(in);
                     finish();
@@ -1643,7 +1657,7 @@ public class VideoActivity extends AppCompatActivity {
              */
             if (room != null) {
                 room.disconnect();
-                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
                 if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_EMERGENCY_CALL, false)){
                     LeaveEmergencyRoom();
                 }
@@ -1658,18 +1672,21 @@ public class VideoActivity extends AppCompatActivity {
             audioSwitch.deactivate();
             if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("1"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
             }
             else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("2"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, MainActivity.class);
                 startActivity(in);
                 finish();
             }
             else if(SharedPreferencesUtils.getInstance(this).getValue(Constants.KEY_VIDEO_BACK_CLASS, null).equals("3"))
             {
+                SharedPreferencesUtils.getInstance(this).setValue(Constants.KEY_NAV_CLASS, false);
                 Intent in = new Intent(this, ManageBookingsActivity.class);
                 startActivity(in);
                 finish();
@@ -1834,7 +1851,7 @@ public class VideoActivity extends AppCompatActivity {
                 {
                     if (room != null && room.getState() != Room.State.DISCONNECTED) {
                         room.disconnect();
-                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
                     }
                     ExitRoom2();
                 }
@@ -1862,7 +1879,7 @@ public class VideoActivity extends AppCompatActivity {
                 if(response.getStatus())
                 {
 //                    room.disconnect();
-                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                    SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
 //                    ExitRoom2();
                 }
             }
@@ -1890,7 +1907,7 @@ public class VideoActivity extends AppCompatActivity {
                     SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_EMERGENCY_CALL, false);
                     if (room != null && room.getState() != Room.State.DISCONNECTED) {
                         room.disconnect();
-                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, true);
+                        SharedPreferencesUtils.getInstance(VideoActivity.this).setValue(Constants.KEY_NAV_CLASS, false);
                     }
                 }
             }

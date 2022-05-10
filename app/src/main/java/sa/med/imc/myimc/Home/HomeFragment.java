@@ -1344,6 +1344,19 @@ public class HomeFragment extends Fragment implements BookingViews, CheckInViews
                 /*Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(booking.getTeleHealthLink()));
                 startActivity(i);*/
+                String DrName = null;
+                if (booking.getGivenName() != null) {
+//                    if (booking.getFamilyName() != null) {
+//                        DrName =  "DR. " + booking.getGivenName() + " " + booking.getFamilyName();
+//                    }
+//                    else {
+//                        DrName= "DR. " + booking.getGivenName();
+//                    }
+                    DrName = getResources().getString(R.string.dr) + " " + booking.getGivenName()+" - "+booking.getClinicDescEn();
+                }
+
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN_NAME, DrName);
+                SharedPreferencesUtils.getInstance(getActivity()).setValue(Constants.KEY_VIDEO_PHYSICIAN, booking.getDocCode());
                 clickToStartVideoCall(booking.getId(), booking.getApptDateString());
             }
         });
